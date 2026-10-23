@@ -14,17 +14,3 @@ def time_match(pred_start_ms, pred_end_ms, gold_start_ms, gold_end_ms):
     duration = pred_end_ms - pred_start_ms
     return {'pass': 5 * intersection >= 4 * duration, 'coverage': intersection / duration,
             'intersection_ms': intersection, 'prediction_duration_ms': duration}
-
-
-def aligned_track_time_match(gold_track, pred_track):
-    """Invoke only for structurally aligned candidates; never search other GT events."""
-    if len(gold_track['cycles']) != len(pred_track['cycles']):
-        return False, []
-    diagnostics = []
-    for gc, pc in zip(gold_track['cycles'], pred_track['cycles']):
-        if len(gc['events']) != len(pc['events']):
-            return False, []
-        for ge, pe in zip(gc['events'], pc['events']):
-            result = time_match(pe.get('start_ms'), pe.get('end_ms'), ge.get('start_ms'), ge.get('end_ms'))
-            diagnostics.append(result)
-    return bool(diagnostics) and all(x['pass'] for x in diagnostics), diagnostics

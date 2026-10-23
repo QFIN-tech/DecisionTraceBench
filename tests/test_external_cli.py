@@ -8,9 +8,8 @@ import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
-import score
-from test_evaluate import simple_case
+from decisiontracebench import scoring as score
+from test_evaluation import simple_case
 
 
 class ExternalTests(unittest.TestCase):

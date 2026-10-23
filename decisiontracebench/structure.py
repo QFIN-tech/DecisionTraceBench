@@ -1,6 +1,4 @@
 """Structural constraints for trajectory cycles and settlement events."""
-import fullvalue_score as official
-from time_scoring import time_match
 def structural_violations(t):
     failures = []
     for ci, c in enumerate(t['cycles']):

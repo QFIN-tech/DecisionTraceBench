@@ -5,7 +5,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-import trial_score as s
+from decisiontracebench import matching as s, schema, structure
+from decisiontracebench import quantities, historical_reviews
 
 
 def event(eid='E1', value=None, action='start', speaker='S1', scope='scope', source=None, **extra):
@@ -30,9 +31,9 @@ def fixture(gold=None, pred=None, nd=None, td=None, time_enabled=True):
             unmatched = [dict(cycle_index=ci, event_index=ei) for ci, c in enumerate(p['cycles']) for ei, e in enumerate(c['events'])]
         rows.append({'review_id': f'a/T{i}', 'prediction_track_index': i, 'entity_id': p['entity_id'],
                      'field_id': p['field_id'], 'gold_present': g is not None,
-                     'structural_violations': s.legacy.structural_violations(p), 'unresolved_nodes': unmatched})
+                     'structural_violations': structure.structural_violations(p), 'unresolved_nodes': unmatched})
     sample = {'audit_id': 'a', 'source_group': 'test', 'time_enabled': time_enabled,
-              'row': {'gold_tracks': len(gold), 'prediction_tracks': len(pred), 'schema_errors': s.official.validate({'tracks': pred}),
+              'row': {'gold_tracks': len(gold), 'prediction_tracks': len(pred), 'schema_errors': schema.validate({'tracks': pred}),
                       'tracks': rows, 'sample_id': 'fsb_test'}}
     return sample, {'tracks': gold}, {'tracks': pred}, nd or {}, td or {}
 
@@ -156,10 +157,10 @@ class TrialTests(unittest.TestCase):
         self.assertEqual(result['blocked'][0]['reason'], 'displaced_anchor_requires_review')
 
     def test_numeric_guard_and_object_order(self):
-        self.assertEqual(s.protected_quantities({'amount': {'number': '5', 'unit': '万'}, 'status': 'a'}),
-                         s.protected_quantities({'status': 'b', 'amount': {'unit': '元', 'number': '50000'}}))
-        self.assertNotEqual(s.protected_quantities({'number': '5', 'unit': '个月'}),
-                            s.protected_quantities({'number': '6', 'unit': '个月'}))
+        self.assertEqual(quantities.protected_quantities({'amount': {'number': '5', 'unit': '万'}, 'status': 'a'}),
+                         quantities.protected_quantities({'status': 'b', 'amount': {'unit': '元', 'number': '50000'}}))
+        self.assertNotEqual(quantities.protected_quantities({'number': '5', 'unit': '个月'}),
+                            quantities.protected_quantities({'number': '6', 'unit': '个月'}))
 
     def test_equivalence_uncertainty_not_approved(self):
         f = fixture(pred=[track(evs=[event(value={'status': '同义原文'})])])
@@ -171,22 +172,22 @@ class TrialTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             Path(folder, 'review.json').write_text(json.dumps({'reviewer': 'test', 'decisions': [
                 {'candidate_id': 'c', 'verdict': 'uncertain', 'reason': '不确定', 'evidence_quote': '原文'}]}), encoding='utf-8')
-            allows, coverage, _ = s.load_approvals({'candidates': [candidate]}, folder, [sample], {'a': (gold, pred)})
+            allows, coverage, _ = historical_reviews.load_approvals({'candidates': [candidate]}, folder, [sample], {'a': (gold, pred)})
         self.assertTrue(coverage['complete'])
         self.assertFalse(allows['value'])
 
     def test_text_quantity_spelling_needs_explicit_check(self):
         g, p = {'term': '6个月'}, {'term': '六个月'}
-        self.assertFalse(s.quantity_approval_valid(g, p, {'verdict': 'equivalent'}))
+        self.assertFalse(quantities.quantity_approval_valid(g, p, {'verdict': 'equivalent'}))
         d = {'quantity_equivalence_verified': True, 'quantity_equivalence_reason': '六个月与6个月相同'}
-        self.assertTrue(s.quantity_approval_valid(g, p, d))
-        self.assertFalse(s.quantity_approval_valid({'number': '6', 'unit': '个月'},
+        self.assertTrue(quantities.quantity_approval_valid(g, p, d))
+        self.assertFalse(quantities.quantity_approval_valid({'number': '6', 'unit': '个月'},
                                                   {'number': '7', 'unit': '个月'}, d))
 
     def test_list_order_only_allowed_with_explicit_quantity_check(self):
         g, p = {'items': ['9月报表', '材料']}, {'items': ['材料', '9月报表']}
-        self.assertFalse(s.quantity_approval_valid(g, p, {}))
-        self.assertTrue(s.quantity_approval_valid(g, p, {
+        self.assertFalse(quantities.quantity_approval_valid(g, p, {}))
+        self.assertTrue(quantities.quantity_approval_valid(g, p, {
             'quantity_equivalence_verified': True, 'quantity_equivalence_reason': '同一9月报表，仅列表次序变化'}))
 
     def test_dependencies_pending_blocked_and_approved(self):
@@ -194,21 +195,21 @@ class TrialTests(unittest.TestCase):
         catalog = {'candidates': [dict(pair, candidate_id='k', dimension='track_key'),
                                   dict(pair, candidate_id='v', dimension='value'),
                                   dict(pair, candidate_id='s', dimension='scope')]}
-        pending = s.dependency_coverage(catalog, {})
+        pending = historical_reviews.dependency_coverage(catalog, {})
         self.assertFalse(pending['complete'])
         self.assertEqual(pending['dependency_pending_count'], 2)
         for verdict in ('uncertain', 'not_equivalent'):
-            blocked = s.dependency_coverage(catalog, {'k': {'verdict': verdict}})
+            blocked = historical_reviews.dependency_coverage(catalog, {'k': {'verdict': verdict}})
             self.assertTrue(blocked['complete'])
             self.assertEqual(blocked['dependency_blocked_count'], 2)
-        approved = s.dependency_coverage(catalog, {'k': {'verdict': 'equivalent'}})
+        approved = historical_reviews.dependency_coverage(catalog, {'k': {'verdict': 'equivalent'}})
         self.assertFalse(approved['complete'])
         self.assertEqual(approved['unreviewed_required'], ['s', 'v'])
 
     def test_same_key_dependencies_need_review_even_without_key_candidate(self):
         catalog = {'candidates': [{'candidate_id': 'v', 'sample_id': 's', 'dimension': 'value',
                                   'gold_key': ['x', 'f'], 'prediction_key': ['x', 'f']}]}
-        result = s.dependency_coverage(catalog, {})
+        result = historical_reviews.dependency_coverage(catalog, {})
         self.assertFalse(result['complete'])
         self.assertEqual(result['unreviewed_required'], ['v'])
 
@@ -217,9 +218,9 @@ class TrialTests(unittest.TestCase):
         d = {'quantity_equivalence_verified': True, 'quantity_equivalence_reason': '同一实际放款金额均为0',
              'quantity_alignment': [{'gold': {'path': [], 'number': '0', 'unit': '万'},
                                      'prediction': {'path': ['status'], 'number': '0', 'unit': '万元', 'surface': '0万元'}}]}
-        self.assertTrue(s.quantity_approval_valid(g, p, d))
-        self.assertFalse(s.quantity_approval_valid({'number': '1', 'unit': '万'}, p, d))
-        self.assertFalse(s.quantity_approval_valid(g, {'status': '实际已放款1万元'}, d))
+        self.assertTrue(quantities.quantity_approval_valid(g, p, d))
+        self.assertFalse(quantities.quantity_approval_valid({'number': '1', 'unit': '万'}, p, d))
+        self.assertFalse(quantities.quantity_approval_valid(g, {'status': '实际已放款1万元'}, d))
 
     def test_quantity_alignment_cannot_omit_second_amount(self):
         g = {'amount': {'number': '0', 'unit': '万'}, 'fee': {'number': '1', 'unit': '万'}}
@@ -227,16 +228,16 @@ class TrialTests(unittest.TestCase):
         d = {'quantity_equivalence_verified': True, 'quantity_equivalence_reason': '测试',
              'quantity_alignment': [{'gold': {'path': ['amount'], 'number': '0', 'unit': '万'},
                                      'prediction': {'path': ['status'], 'number': '0', 'unit': '万元', 'surface': '0万元'}}]}
-        self.assertFalse(s.quantity_approval_valid(g, p, d))
+        self.assertFalse(quantities.quantity_approval_valid(g, p, d))
 
     def test_zero_surface_certificate_is_specific_and_cannot_hide_positive_amount(self):
         d = {'quantity_equivalence_verified': True, 'quantity_equivalence_reason': '项目累计未放款为零',
              'quantity_alignment': [{'gold': {'path': [], 'number': '0', 'unit': '万'},
                                      'prediction': {'path': ['status'], 'number': '0', 'unit': '万', 'surface': '未放款',
                                                     'zero_surface_kind': 'no_disbursement', 'surface_equivalence_reason': '仅此累计未放款状态'}}]}
-        self.assertTrue(s.quantity_approval_valid({'number': '0', 'unit': '万'}, {'status': '未放款'}, d))
-        self.assertFalse(s.quantity_approval_valid({'number': '1', 'unit': '万'}, {'status': '未放款'}, d))
-        self.assertFalse(s.quantity_approval_valid({'number': '0', 'unit': '万'}, {'status': '今天未放款'}, d))
+        self.assertTrue(quantities.quantity_approval_valid({'number': '0', 'unit': '万'}, {'status': '未放款'}, d))
+        self.assertFalse(quantities.quantity_approval_valid({'number': '1', 'unit': '万'}, {'status': '未放款'}, d))
+        self.assertFalse(quantities.quantity_approval_valid({'number': '0', 'unit': '万'}, {'status': '今天未放款'}, d))
 
 
 if __name__ == '__main__':

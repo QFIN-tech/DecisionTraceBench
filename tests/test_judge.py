@@ -10,8 +10,8 @@ import threading
 import unittest
 from unittest.mock import patch
 
-from judge_client import ChatClient, NoRedirect, ReviewError, load_config, response_document, strict_json
-import judge_pipeline as j
+from decisiontracebench.judge_client import ChatClient, NoRedirect, ReviewError, load_config, response_document, strict_json
+from decisiontracebench import judge_pipeline as j
 
 ROOT = Path(__file__).resolve().parent.parent
 

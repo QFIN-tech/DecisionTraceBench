@@ -1,12 +1,12 @@
 # DecisionTraceBench
 
-Evaluation code for **DecisionTraceBench: Tracking Decision-Critical Information in Multi-Party Spoken Conversations**.
+DecisionTraceBench is a speech benchmark for tracking decision-critical information in multi-party conversations. Grounded in Chinese financial dialogues, it evaluates how information is introduced, revised, suspended and settled, together with speaker attribution, business scope and temporal evidence. It aims to support collaboration between academia and industry on traceable speech understanding through structured trajectory annotations, task prompts and evaluation scripts.
 
-[English](README.md) | [简体中文](README.zh-CN.md)
+🤗 [Hugging Face](https://huggingface.co/datasets/QFIN/DecisionTraceBench)   |   🌐 [简体中文](README.zh-CN.md)
 
 Decision-Critical Information State Tracking (DCIST) evaluates the recovery of complete decision-state trajectories from multi-party conversations. A trajectory match requires the correct event sequence, actions, speaker attribution, scope, values and temporal evidence.
 
-Dataset location: [QFIN/DecisionTraceBench on Hugging Face](https://huggingface.co/datasets/QFIN/DecisionTraceBench). Data is distributed separately; check that repository's current files for availability. The prepared human-performed subset contains 26 recordings (8.61 hours), 308 trajectories and 562 events. It excludes transcripts and the paper's synthetic subset.
+Data is distributed separately on Hugging Face; check that repository's current files for availability. The prepared human-performed subset contains 26 recordings (8.61 hours), 308 trajectories and 562 events. It excludes transcripts and the paper's synthetic subset.
 
 ## Features
 
@@ -164,13 +164,17 @@ Exit code `0` indicates completed scoring; `2` indicates an input error or pendi
 ```text
 score.py          Single-sample and batch CLI
 judge.py          Automatic adjudication and scoring CLI
-code/             Matching, validation, monetary and temporal scoring
+decisiontracebench/  Scoring library, matching and adjudication modules
 docs/             Scoring protocol and file formats
 prompts/          Task and adjudication queries
 example/          Runnable examples
 tests/            Regression tests
 run_tests.py      Test runner
 ```
+
+## Python library
+
+The root scripts are CLI entry points. Python callers can use `decisiontracebench.scoring.score_case` and `aggregate` directly. The package separates `evaluation` (review validation), `matching` (ordered alignment and trajectory matching), `schema`/`structure`, `money`/`quantities`/`timing`, and `judge_client`/`judge_pipeline`. `historical_reviews` reads archived candidate catalogs and is separate from the current CLI workflow.
 
 ## Citation
 

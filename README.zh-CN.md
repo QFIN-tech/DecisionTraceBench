@@ -1,12 +1,12 @@
 # DecisionTraceBench
 
-论文 **DecisionTraceBench: Tracking Decision-Critical Information in Multi-Party Spoken Conversations** 的评测代码。
+DecisionTraceBench 是面向多人对话中决策关键信息跟踪的语音评测基准。它以中文金融对话为场景，评估信息从提出、修订、暂停到定案的完整过程，以及对应的说话人归属、业务作用域和时间证据。基准通过结构化轨迹标注、任务提示词和评测脚本，为学术界与产业界开展可追溯语音理解研究提供共同的评测基础。
 
-[English](README.md) | [简体中文](README.zh-CN.md)
+🤗 [Hugging Face](https://huggingface.co/datasets/QFIN/DecisionTraceBench)   |   🌐 [English](README.md)
 
 决策关键信息状态跟踪（Decision-Critical Information State Tracking，DCIST）评估模型从多人对话中恢复完整决策状态轨迹的能力。轨迹匹配要求事件序列、动作、说话人归属、作用域、值和时间证据均满足评测要求。
 
-数据集地址：[Hugging Face 上的 QFIN/DecisionTraceBench](https://huggingface.co/datasets/QFIN/DecisionTraceBench)。数据独立分发，实际可用内容以该仓库文件列表为准。已准备的人工录音子集含 26 份录音（8.61 小时）、308 条轨迹和 562 个事件，不含转写文本及论文中的合成子集。
+数据在 Hugging Face 独立分发，实际可用内容以数据仓库文件列表为准。已准备的人工录音子集含 26 份录音（8.61 小时）、308 条轨迹和 562 个事件，不含转写文本及论文中的合成子集。
 
 ## 功能
 
@@ -164,13 +164,17 @@ DCIST 按录音进行宏平均。每条必需轨迹需要完整恢复，仅匹�
 ```text
 score.py          单样本与批量评分入口
 judge.py          自动裁定与评分入口
-code/             匹配、格式校验、金额和时间评分
+decisiontracebench/  评分库、匹配与裁定模块
 docs/             评分协议与文件格式
 prompts/          任务及裁定 Query
 example/          可运行示例
 tests/            回归测试
 run_tests.py      测试入口
 ```
+
+## Python 评分库
+
+根目录脚本仅作为命令行入口。Python 调用方可直接使用 `decisiontracebench.scoring.score_case` 和 `aggregate`。包内按职责划分为 `evaluation`（裁定校验）、`matching`（有序对齐与轨迹匹配）、`schema`/`structure`（格式与结构）、`money`/`quantities`/`timing`（金额、数量及时间约束），以及 `judge_client`/`judge_pipeline`（裁定服务与流程）。`historical_reviews` 用于读取历史候选目录，与当前 CLI 流程分开。
 
 ## 引用
 

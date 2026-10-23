@@ -5,7 +5,8 @@ import json
 from pathlib import Path
 import sys
 
-import trial_score as core
+from . import matching as core, schema, structure, timing
+from .quantities import quantity_approval_valid
 
 NODE_LABELS={'exempt_extra','invalid_extra','replacement_error','evidence_uncertain'}
 TRACK_LABELS={'exempt_new_track','wrong_field_or_invalid_track','evidence_uncertain'}
@@ -31,7 +32,7 @@ def base_sample(gold,pred,time_enabled):
         matched={(c['cycle_index'],ei) for c in aligned['cycles'] for _,ei in c['matched']}
         rows.append({'review_id':f'case/T{pi}','prediction_track_index':pi,
             'entity_id':pt['entity_id'],'field_id':pt['field_id'],'gold_present':bool(candidates),
-            'structural_violations':core.legacy.structural_violations(pt),
+            'structural_violations':structure.structural_violations(pt),
             'unresolved_nodes':[dict(cycle_index=ci,event_index=ei) for ci,ei in sorted(positions(pt)-matched)]})
     return {'audit_id':'case','time_enabled':time_enabled,'row':{'sample_id':'case',
         'gold_tracks':len(gold['tracks']),'prediction_tracks':len(pred['tracks']),
@@ -60,7 +61,7 @@ def approved_mappings(case,gold,pred,time_enabled):
         if label=='equivalent':
             if dim=='value':
                 require(gv is not None and pv is not None,'Null values cannot be filled by semantic review')
-                require(core.quantity_approval_valid(gv,pv,item),'Semantic review changed a protected quantity')
+                require(quantity_approval_valid(gv,pv,item),'Semantic review changed a protected quantity')
             allows[dim].setdefault(coord,[]).append(cid)
     for dim in ('value','scope'):
         for coord in allows[dim]:
@@ -97,21 +98,21 @@ def evaluate(case):
     require(case.get('inference_status')=='completed','Incomplete, failed or truncated generation is not a scored zero')
     require(type(case.get('time_enabled')) is bool,'Explicit time_enabled is required')
     gold=case['gold'];raw=case['prediction'];timed=case['time_enabled']
-    require(not core.official.validate(gold),'Invalid gold input')
+    require(not schema.validate(gold),'Invalid gold input')
     require(len({core.key(t) for t in gold['tracks']})==len(gold['tracks']),'Gold fields must be unique')
     for t in gold['tracks']:
-        require(not core.legacy.structural_violations(t),'Invalid gold cycle structure')
+        require(not structure.structural_violations(t),'Invalid gold cycle structure')
         if timed:
             for c in t['cycles']:
-                for e in c['events']:core.legacy.time_match(e.get('start_ms'),e.get('end_ms'),e.get('start_ms'),e.get('end_ms'))
+                for e in c['events']:timing.time_match(e.get('start_ms'),e.get('end_ms'),e.get('start_ms'),e.get('end_ms'))
     try:
-        pred=core.official.parse_json(raw) if isinstance(raw,str) else raw
-        errors=core.official.validate(pred)
+        pred=schema.parse_json(raw) if isinstance(raw,str) else raw
+        errors=schema.validate(pred)
     except (TypeError,ValueError):
         pred=None;errors=['unparseable_completed_answer']
     if errors:
         count=len(pred['tracks']) if isinstance(pred,dict) and isinstance(pred.get('tracks'),list) else 0
-        score=core.official.ratio(0,len(gold['tracks']),count)
+        score=schema.ratio(0,len(gold['tracks']),count)
         return {'status':'completed_format_error','schema_errors':errors,'raw_score':score,
                 'dcist':score['f1'],'extra_node_ratio':None,'extra_node_count':None,'node_count':None}
     sample=base_sample(gold,pred,timed)

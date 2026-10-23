@@ -7,12 +7,11 @@ from pathlib import Path
 import re
 from threading import Lock
 
-import evaluate as adapter
-import score
-from judge_client import ReviewError, require, response_document, strict_json
+from . import evaluation as adapter, matching as core, schema, structure, money
+from . import scoring as score
+from .judge_client import ReviewError, require, response_document, strict_json
 
 ROOT = Path(__file__).resolve().parent.parent
-core = adapter.core
 DECISION_KEYS = ('semantic_decisions', 'node_decisions', 'track_decisions')
 
 
@@ -32,7 +31,7 @@ def write_once(path, value):
 
 
 def code_snapshot():
-    files = list((ROOT / 'code').glob('*.py')) + [ROOT / 'score.py', ROOT / 'judge.py']
+    files = list((ROOT / 'decisiontracebench').glob('*.py')) + [ROOT / 'score.py', ROOT / 'judge.py']
     return {p.relative_to(ROOT).as_posix(): p.read_text(encoding='utf-8-sig') for p in sorted(files)}
 
 
@@ -86,7 +85,7 @@ def prepare(manifest_path, run_dir):
         require(actual is not None or (reference is not None and isinstance(note, str) and note.strip()),
                 'Supply actual_input, or reference plus an explicit actual_input_note for audio-only generation')
         if baseline['status'] != 'completed_format_error':
-            case['prediction'] = core.official.parse_json(case['prediction'])
+            case['prediction'] = schema.parse_json(case['prediction'])
         samples.append({'id': f'sample_{index + 1:04d}', 'sample_id': sid, 'case': case,
                         'generation_query': task, 'actual_input': actual, 'reference': reference,
                         'actual_input_note': note, 'format_error': baseline['status'] == 'completed_format_error'})
@@ -114,7 +113,7 @@ def prepare(manifest_path, run_dir):
 
 
 def value_possible(g, p):
-    if core.same(core.money.normalize(g), core.money.normalize(p)):
+    if core.same(money.normalize(g), money.normalize(p)):
         return True
     if g is None or p is None:
         return False
@@ -134,7 +133,7 @@ def candidates(case):
     gold, pred, timed = case['gold'], case['prediction'], case['time_enabled']
     for gi, gt in enumerate(gold['tracks']):
         for pi, pt in enumerate(pred['tracks']):
-            if core.legacy.structural_violations(pt) or len(gt['cycles']) != len(pt['cycles']):
+            if structure.structural_violations(pt) or len(gt['cycles']) != len(pt['cycles']):
                 continue
             is_same_key = core.key(gt) == core.key(pt)
             hard_pairs = []
@@ -168,7 +167,7 @@ def candidates(case):
                     coords = dict(cycle_index=ci, gold_event_index=gei, prediction_event_index=pei)
                     if ge['scope_id'] != pe['scope_id']:
                         events.append(entry('scope', ge['scope_id'], pe['scope_id'], coords))
-                    if not core.same(core.money.normalize(ge['value']), core.money.normalize(pe['value'])):
+                    if not core.same(money.normalize(ge['value']), money.normalize(pe['value'])):
                         events.append(entry('value', ge['value'], pe['value'], coords))
     return keys, events
 

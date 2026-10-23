@@ -3,8 +3,8 @@ import json
 from pathlib import Path
 import unittest
 
-import evaluate as cli
-from test_trial_score import event, track
+from decisiontracebench import evaluation as cli
+from test_matching import event, track
 
 ROOT = Path(__file__).resolve().parents[1]
 
