@@ -1,12 +1,12 @@
 # Automated adjudication
 
-`judge.py` generates occurrence-specific semantic decisions and extra-event decisions through a chat-completions-compatible service, then evaluates them with the DCIST scorer. Supply your own model, API key and service URL.
+`python -m decisiontracebench judge` generates occurrence-specific semantic decisions and extra-event decisions through a chat-completions-compatible service, then evaluates them with the DCIST scorer. Supply your own model, API key and service URL.
 
-This runner uses one configured judge model. The paper additionally uses sequential second-model review and human resolution of disagreements before freezing the judgments for primary scoring. Those stages are not automated here. Use finalized adjudications with `score.py` for deterministic recomputation; a new automated run is not an exact reproduction of the paper's frozen judgments.
+This runner uses one configured judge model. The paper additionally uses sequential second-model review and human resolution of disagreements before freezing the judgments for primary scoring. Those stages are not automated here. Use finalized adjudications with `python -m decisiontracebench score` for deterministic recomputation; a new automated run is not an exact reproduction of the paper's frozen judgments.
 
 ## Setup
 
-Copy `judge_config.example.json` to `judge_config.json` and fill these fields:
+Copy `assets/configs/judge_config.example.json` to `assets/configs/judge_config.json` and fill these fields:
 
 | Field | Required value |
 |---|---|
@@ -14,16 +14,16 @@ Copy `judge_config.example.json` to `judge_config.json` and fill these fields:
 | `base_url` | Your HTTPS API base URL; `/chat/completions` is appended unless already present. |
 | `model` | The model identifier accepted by your service. |
 
-`DTB_API_KEY`, `DTB_BASE_URL` and `DTB_MODEL` environment variables override the corresponding file values. The example leaves all three blank. `judge_config.json` and `runs/` are ignored by Git. Keep other credential files outside the repository or add them to your local ignore rules.
+`DTB_API_KEY`, `DTB_BASE_URL` and `DTB_MODEL` environment variables override the corresponding file values. The example leaves all three blank. `assets/configs/judge_config.json` and `runs/` are ignored by Git. Keep other credential files outside the repository or add them to your local ignore rules.
 
 The client uses the Python standard library, verifies TLS certificates and rejects redirects. Requests use `stream: false`, one response choice, and the configured token budget. `token_limit_field` supports `max_tokens` or `max_completion_tokens`. Set `json_mode` to `true` only if your service supports `response_format: {"type":"json_object"}`.
 
 ## Input manifest
 
-Start from [example/judge_manifest.json](../example/judge_manifest.json). Paths are relative to the manifest file. Each sample supplies:
+Start from [assets/examples/judge_manifest.json](../assets/examples/judge_manifest.json). Paths are relative to the manifest file. Each sample supplies:
 
 - `sample_id`: a unique identifier.
-- `gold`, `prediction`: the same files accepted by `score.py`.
+- `gold`, `prediction`: the same files accepted by `python -m decisiontracebench score`.
 - `generation_query`: the complete task instructions and vocabulary used to generate this prediction.
 - `actual_input`: the complete text supplied to the prediction model, with speaker/time annotations when available.
 - `reference`: an optional, separately identified reference transcript or script.
@@ -32,14 +32,14 @@ Start from [example/judge_manifest.json](../example/judge_manifest.json). Paths 
 
 For predictions generated directly from audio, provide `reference` and `actual_input_note` if there is no textual actual input. The note must identify the original modality and the reference's status. The judge receives text evidence only; the runner does not perform acoustic verification. Do not substitute a reference script for an ASR input without identifying the difference.
 
-The three task templates in `prompts/task_*.txt` provide the DecisionTraceBench task rules and vocabulary for timed transcripts, speaker-labeled reference scripts, and unlabeled reference scripts. Select the template that actually matches your generation setup. For a different task, supply its own complete query. The runnable example uses a small fictional task vocabulary in `example/task_query.txt`.
+The three task templates in `assets/prompts/task_*.txt` provide the DecisionTraceBench task rules and vocabulary for timed transcripts, speaker-labeled reference scripts, and unlabeled reference scripts. Select the template that actually matches your generation setup. For a different task, supply its own complete query. The runnable example uses a small fictional task vocabulary in `assets/examples/task_query.txt`.
 
-Existing review files are not accepted by the automatic-review manifest. This workflow creates new adjudications from the supplied predictions and evidence. To score existing adjudications directly, use `score.py`.
+Existing review files are not accepted by the automatic-review manifest. This workflow creates new adjudications from the supplied predictions and evidence. To score existing adjudications directly, use `python -m decisiontracebench score`.
 
 ## Prepare without model calls
 
 ```sh
-uv run --no-project python judge.py prepare --manifest example/judge_manifest.json --run-dir runs/example
+uv run --no-project python -m decisiontracebench judge prepare --manifest assets/examples/judge_manifest.json --run-dir runs/example
 ```
 
 Preparation validates the GT and prediction, snapshots the inputs and prompts, and reports candidate counts. It makes no API calls. The plan contains the complete evidence, so treat the run directory as private research data.
@@ -47,7 +47,7 @@ Preparation validates the GT and prediction, snapshots the inputs and prompts, a
 ## Run adjudication and scoring
 
 ```sh
-uv run --no-project python judge.py run --run-dir runs/example --config judge_config.json --workers 4 --max-requests 100
+uv run --no-project python -m decisiontracebench judge run --run-dir runs/example --config assets/configs/judge_config.json --workers 4 --max-requests 100
 ```
 
 This command sends the prepared task instructions, GT, predictions and evidence to the configured service and may incur charges. Ensure you have permission to send those materials to that service.
@@ -63,7 +63,7 @@ The stages are:
 
 ## Decision rules
 
-The complete prompts are [semantic_equivalence.txt](../prompts/semantic_equivalence.txt) and [extra_nodes.txt](../prompts/extra_nodes.txt). The runner substitutes the evidence placeholders without rewriting their adjudication rules. Task instructions and evidence are supplied as input; dialogue and prediction content are not agent instructions.
+The complete prompts are [semantic_equivalence.txt](../assets/prompts/semantic_equivalence.txt) and [extra_nodes.txt](../assets/prompts/extra_nodes.txt). The runner substitutes the evidence placeholders without rewriting their adjudication rules. Task instructions and evidence are supplied as input; dialogue and prediction content are not agent instructions.
 
 | Decision | Effect |
 |---|---|
@@ -84,7 +84,7 @@ Repeat the `run` command to continue requests not yet sent. Successful requests 
 To explicitly retry failed or unknown attempts once each:
 
 ```sh
-uv run --no-project python judge.py run --run-dir runs/example --config judge_config.json --workers 4 --max-requests 100 --retry-failed
+uv run --no-project python -m decisiontracebench judge run --run-dir runs/example --config assets/configs/judge_config.json --workers 4 --max-requests 100 --retry-failed
 ```
 
 This can incur additional usage. All previous attempts remain available. The model settings and prepared inputs must remain the same; use a new run directory for different settings or code. A `run.lock` prevents simultaneous processes from submitting the same run. After a crash, confirm that the process has stopped before manually removing a stale lock.
@@ -100,7 +100,7 @@ Transport errors and invalid judge responses leave the affected samples pending.
 | `model_settings.json` | Model and generation parameters, without API key or service URL. |
 | `requests/` | Exact message payloads, separate attempts, redacted response envelopes, usage when returned, validation outcomes and errors. |
 | `reviews/sample_*.json` | Validated `semantic_decisions`, `node_decisions` and `track_decisions`. |
-| `scoring_cases/sample_*.json` | Combined inputs accepted by `score.py --case`. |
+| `scoring_cases/sample_*.json` | Combined inputs accepted by `python -m decisiontracebench score --case`. |
 | `scores/sample_*.json` | Per-sample scoring results. |
 | `results.json` | Final cohort summary and sample results, created only after full completion. |
 
@@ -109,7 +109,7 @@ Request directories use generated identifiers rather than arbitrary sample IDs a
 To recompute a completed sample without model calls:
 
 ```sh
-uv run --no-project python score.py --mode reviewed --case runs/example/scoring_cases/sample_0001.json
+uv run --no-project python -m decisiontracebench score --mode reviewed --case runs/assets/examples/scoring_cases/sample_0001.json
 ```
 
 Exit code `0` indicates successful preparation or complete scoring. Exit code `2` indicates an input error or pending/failed adjudication. Scores from automatic review depend on the selected model and evidence; retain the response records for inspection.

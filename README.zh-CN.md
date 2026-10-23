@@ -25,7 +25,7 @@ Python **3.10 及以上**，仅依赖 Python 标准库。以下命令使用 [uv]
 在仓库根目录运行测试：
 
 ```sh
-uv run --no-project python run_tests.py
+uv run --no-project python -B -m unittest discover -s tests -v
 ```
 
 请勿使用 `python -O`，以保留输入校验所需的断言。
@@ -37,13 +37,13 @@ uv run --no-project python run_tests.py
 使用 `raw` 模式进行精确匹配，包含金额等价归一化：
 
 ```sh
-uv run --no-project python score.py --mode raw --gold example/gold.json --prediction example/prediction.json --time on
+uv run --no-project python -m decisiontracebench score --mode raw --gold assets/examples/gold.json --prediction assets/examples/prediction.json --time on
 ```
 
 使用 `reviewed` 模式应用语义对应关系和额外节点裁定：
 
 ```sh
-uv run --no-project python score.py --mode reviewed --gold example/gold.json --prediction example/prediction.json --reviews example/reviews.json --time on
+uv run --no-project python -m decisiontracebench score --mode reviewed --gold assets/examples/gold.json --prediction assets/examples/prediction.json --reviews assets/examples/reviews.json --time on
 ```
 
 示例演示语义等价和额外轨迹免罚对计分的影响：原始 F1 为 `0`，审核后 F1 为 `1`，免罚额外节点比例为 `1/3`。
@@ -51,7 +51,7 @@ uv run --no-project python score.py --mode reviewed --gold example/gold.json --p
 ### 批量评分
 
 ```sh
-uv run --no-project python score.py --mode reviewed --manifest example/manifest.json --output results/example.json
+uv run --no-project python -m decisiontracebench score --mode reviewed --manifest assets/examples/manifest.json --output results/example.json
 ```
 
 清单中的相对路径以清单所在目录为基准。每个样本须有唯一 ID，同一批次采用一致的时间评测设置。
@@ -61,7 +61,7 @@ uv run --no-project python score.py --mode reviewed --manifest example/manifest.
 也可以将金标、预测、评测设置和裁定记录放在同一个文件中：
 
 ```sh
-uv run --no-project python score.py --mode reviewed --case example/case.json
+uv run --no-project python -m decisiontracebench score --mode reviewed --case assets/examples/case.json
 ```
 
 ## 自动同义复核与额外节点裁定
@@ -69,13 +69,13 @@ uv run --no-project python score.py --mode reviewed --case example/case.json
 如需自动生成裁定，先准备包含预测、GT、生成 Query 和原文证据的审核清单：
 
 ```sh
-uv run --no-project python judge.py prepare --manifest example/judge_manifest.json --run-dir runs/example
+uv run --no-project python -m decisiontracebench judge prepare --manifest assets/examples/judge_manifest.json --run-dir runs/example
 ```
 
-此步骤不调用接口。将 `judge_config.example.json` 复制为 `judge_config.json`，填写自己的 `api_key`、`base_url` 和 `model`，然后运行：
+此步骤不调用接口。将 `assets/configs/judge_config.example.json` 复制为 `assets/configs/judge_config.json`，填写自己的 `api_key`、`base_url` 和 `model`，然后运行：
 
 ```sh
-uv run --no-project python judge.py run --run-dir runs/example --config judge_config.json --workers 4 --max-requests 100
+uv run --no-project python -m decisiontracebench judge run --run-dir runs/example --config assets/configs/judge_config.json --workers 4 --max-requests 100
 ```
 
 运行时会将准备好的证据发送给所配置的服务，可能产生接口费用。流程依次进行字段对应、作用域与值的同义复核、额外节点裁定，最后由脚本计算 DCIST。支持并发和请求数上限；续跑复用成功请求，失败或未完整返回的请求需显式重试，未审核项不会自动免罚。
@@ -162,19 +162,18 @@ DCIST 按录音进行宏平均。每条必需轨迹需要完整恢复，仅匹�
 ## 目录结构
 
 ```text
-score.py          单样本与批量评分入口
-judge.py          自动裁定与评分入口
-decisiontracebench/  评分库、匹配与裁定模块
-docs/             评分协议与文件格式
-prompts/          任务及裁定 Query
-example/          可运行示例
-tests/            回归测试
-run_tests.py      测试入口
+decisiontracebench/  Python package and module CLI
+assets/
+  configs/          Configuration templates
+  examples/         Runnable fictional examples
+  prompts/          Task and adjudication prompts
+docs/               Scoring protocol and file formats
+tests/              Offline regression tests
 ```
 
 ## Python 评分库
 
-根目录脚本仅作为命令行入口。Python 调用方可直接使用 `decisiontracebench.scoring.score_case` 和 `aggregate`。包内按职责划分为 `evaluation`（裁定校验）、`matching`（有序对齐与轨迹匹配）、`schema`/`structure`（格式与结构）、`money`/`quantities`/`timing`（金额、数量及时间约束），以及 `judge_client`/`judge_pipeline`（裁定服务与流程）。`historical_reviews` 用于读取历史候选目录，与当前 CLI 流程分开。
+命令行入口统一为 `python -m decisiontracebench score` 和 `python -m decisiontracebench judge`。Python 调用方可直接使用 `decisiontracebench.scoring.score_case` 和 `aggregate`。包内按职责划分为 `evaluation`（裁定校验）、`matching`（有序对齐与轨迹匹配）、`schema`/`structure`（格式与结构）、`money`/`quantities`/`timing`（金额、数量及时间约束），以及 `judge_client`/`judge_pipeline`（裁定服务与流程）。`historical_reviews` 用于读取历史候选目录，与当前 CLI 流程分开。
 
 ## 引用
 

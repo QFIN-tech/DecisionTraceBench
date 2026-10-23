@@ -1,6 +1,7 @@
 """Public CLI tests use constructed fixtures only; no corpus or network."""
 import copy
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -14,11 +15,11 @@ from test_evaluation import simple_case
 
 class ExternalTests(unittest.TestCase):
     def cli(self, *args, cwd=None):
-        return subprocess.run([sys.executable, '-B', str(ROOT/'score.py'), *map(str, args)],
-                              cwd=cwd, capture_output=True, text=True, encoding='utf-8')
+        return subprocess.run([sys.executable, '-B', '-m', 'decisiontracebench', 'score', *map(str, args)],
+                              cwd=cwd, env={**os.environ, 'PYTHONPATH': str(ROOT)}, capture_output=True, text=True, encoding='utf-8')
 
     def test_raw_versus_reviewed_fixture(self):
-        case = score.read_json(ROOT/'example/case.json')
+        case = score.read_json(ROOT/'assets/examples/case.json')
         before = copy.deepcopy(case)
         self.assertEqual(score.score_case(case, 'raw')['f1'], 0)
         self.assertEqual(score.score_case(case, 'reviewed')['f1'], 1)
@@ -26,15 +27,15 @@ class ExternalTests(unittest.TestCase):
 
     def test_optimized_python_cannot_skip_scoring_assertions(self):
         for mode in ('raw', 'reviewed'):
-            p = subprocess.run([sys.executable, '-O', '-B', str(ROOT/'score.py'),
-                                '--mode', mode, '--case', str(ROOT/'example/case.json')],
-                               capture_output=True, text=True, encoding='utf-8')
+            p = subprocess.run([sys.executable, '-O', '-B', '-m', 'decisiontracebench', 'score',
+                                '--mode', mode, '--case', str(ROOT/'assets/examples/case.json')],
+                               env={**os.environ, 'PYTHONPATH': str(ROOT)}, capture_output=True, text=True, encoding='utf-8')
             self.assertEqual(p.returncode, 2, p.stdout)
             self.assertIn('without -O', p.stderr)
             self.assertEqual(p.stdout, '')
 
     def test_unreviewed_cannot_be_final(self):
-        case = score.read_json(ROOT/'example/case.json')
+        case = score.read_json(ROOT/'assets/examples/case.json')
         for k in score.DECISIONS:
             case.pop(k, None)
         result = score.score_case(case, 'reviewed')
@@ -73,15 +74,15 @@ class ExternalTests(unittest.TestCase):
 
     def test_separate_files_from_another_working_directory(self):
         with tempfile.TemporaryDirectory() as temp:
-            p = self.cli('--mode', 'reviewed', '--gold', ROOT/'example/gold.json',
-                         '--prediction', ROOT/'example/prediction.json', '--reviews', ROOT/'example/reviews.json',
+            p = self.cli('--mode', 'reviewed', '--gold', ROOT/'assets/examples/gold.json',
+                         '--prediction', ROOT/'assets/examples/prediction.json', '--reviews', ROOT/'assets/examples/reviews.json',
                          '--time', 'on', cwd=temp)
         self.assertEqual(p.returncode, 0, p.stderr)
         self.assertEqual(json.loads(p.stdout)['summary']['dcist_percent'], 100)
 
     def test_manifest_resolves_relative_to_its_file(self):
         with tempfile.TemporaryDirectory() as temp:
-            p = self.cli('--mode', 'reviewed', '--manifest', ROOT/'example/manifest.json', cwd=temp)
+            p = self.cli('--mode', 'reviewed', '--manifest', ROOT/'assets/examples/manifest.json', cwd=temp)
         self.assertEqual(p.returncode, 0, p.stderr)
         self.assertEqual(json.loads(p.stdout)['summary']['n'], 1)
 
@@ -101,24 +102,24 @@ class ExternalTests(unittest.TestCase):
         self.assertEqual(out['f1'], 0)
 
     def test_cli_refuses_overwriting_input(self):
-        p = self.cli('--case', ROOT/'example/case.json', '--mode', 'raw', '--output', ROOT/'example/case.json')
+        p = self.cli('--case', ROOT/'assets/examples/case.json', '--mode', 'raw', '--output', ROOT/'assets/examples/case.json')
         self.assertEqual(p.returncode, 2)
         self.assertIn('overwrite an input', p.stderr)
 
     def test_output_not_overwritten(self):
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp)/'result.json'
-            p = self.cli('--case', ROOT/'example/case.json', '--mode', 'raw', '--output', path)
+            p = self.cli('--case', ROOT/'assets/examples/case.json', '--mode', 'raw', '--output', path)
             self.assertEqual(p.returncode, 0, p.stderr)
             before = path.read_bytes()
-            p = self.cli('--case', ROOT/'example/case.json', '--mode', 'reviewed', '--output', path)
+            p = self.cli('--case', ROOT/'assets/examples/case.json', '--mode', 'reviewed', '--output', path)
             self.assertEqual(p.returncode, 2)
             self.assertEqual(path.read_bytes(), before)
 
     def test_review_file_cannot_override_gold(self):
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp)/'review.json'; path.write_text('{"gold": {}}', encoding='utf-8')
-            spec = dict(gold=str(ROOT/'example/gold.json'), prediction=str(ROOT/'example/prediction.json'),
+            spec = dict(gold=str(ROOT/'assets/examples/gold.json'), prediction=str(ROOT/'assets/examples/prediction.json'),
                         reviews=str(path), time_enabled=True)
             with self.assertRaisesRegex(ValueError, 'cannot replace'): score.load_external(spec, ROOT, 'reviewed')
 

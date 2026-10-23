@@ -31,7 +31,7 @@ def write_once(path, value):
 
 
 def code_snapshot():
-    files = list((ROOT / 'decisiontracebench').glob('*.py')) + [ROOT / 'score.py', ROOT / 'judge.py']
+    files = list((ROOT / 'decisiontracebench').glob('*.py'))
     return {p.relative_to(ROOT).as_posix(): p.read_text(encoding='utf-8-sig') for p in sorted(files)}
 
 
@@ -91,7 +91,7 @@ def prepare(manifest_path, run_dir):
                         'actual_input_note': note, 'format_error': baseline['status'] == 'completed_format_error'})
     require(len({s['case']['time_enabled'] for s in samples}) == 1, 'Use one time condition per run')
     plan = {'format': 'decisiontracebench.auto_review.v1', 'samples': samples,
-            'prompts': {name: (ROOT / 'prompts' / (name + '.txt')).read_text(encoding='utf-8-sig')
+            'prompts': {name: (ROOT / 'assets' / 'prompts' / (name + '.txt')).read_text(encoding='utf-8-sig')
                         for name in ('semantic_equivalence', 'extra_nodes')},
             'scoring_protocol': (ROOT / 'docs' / 'SCORING.md').read_text(encoding='utf-8-sig'),
             'engine_sources': code_snapshot()}

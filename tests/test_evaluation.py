@@ -30,10 +30,10 @@ def value_review(c, label='equivalent'):
 
 class AdapterTests(unittest.TestCase):
     def test_worked_example_and_input_immutability(self):
-        case = json.loads((ROOT/'example/case.json').read_text(encoding='utf-8'))
+        case = json.loads((ROOT/'assets/examples/case.json').read_text(encoding='utf-8'))
         before = copy.deepcopy(case)
         result = cli.evaluate(case)
-        expected = json.loads((ROOT/'example/expected.json').read_text(encoding='utf-8'))
+        expected = json.loads((ROOT/'assets/examples/expected.json').read_text(encoding='utf-8'))
         for k, v in expected.items(): self.assertEqual(result[k], v, k)
         self.assertEqual(case, before)
 

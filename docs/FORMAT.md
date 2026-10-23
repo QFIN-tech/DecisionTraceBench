@@ -23,7 +23,7 @@ Cycle labels and event labels are identifiers, not semantic answers. Cycle numbe
 
 ## Combined case file
 
-`example/case.json` is a complete executable template. Required top-level keys:
+`assets/examples/case.json` is a complete executable template. Required top-level keys:
 
 - `inference_status`: `completed` for an available answer. Explicit no-answer handling is described under [separate-file and batch evaluation](#separate-file-and-batch-evaluation).
 - `time_enabled`: explicit Boolean. Use `true` for audio/transcript experiments and `false` only for the reference-script condition without temporal localization.
@@ -46,17 +46,17 @@ When importing adjudications, join decisions to candidate coordinates by `candid
 
 ## Output
 
-`score.py` returns `summary` and `samples`. Each sample contains its selected `score`, `f1`, `dcist_percent`, status and matching diagnostics in `details`.
+`python -m decisiontracebench score` returns `summary` and `samples`. Each sample contains its selected `score`, `f1`, `dcist_percent`, status and matching diagnostics in `details`.
 
 Within `details`, `dcist` is the reviewed single-recording F1 as a fraction, not a percentage. `raw_score` has neither semantic nor extra-node approvals but retains exact monetary equivalence. `reviewed_score` uses supplied valid approvals and is null when necessary adjudications are missing. Score objects contain `tp`, `gold`, `pred`, `precision`, `recall`, and `f1`. Completed malformed answers have zero credit in `raw_score` and `dcist`, with no `reviewed_score` field. Matches identify the input coordinates; input files remain intact.
 
-In reviewed mode, `review_required` and a null score mean necessary unmatched positions have not been adjudicated; they represent neither a scored zero nor an evidence-uncertain exemption. Completed malformed output is a format error with zero matching credit. Failed or truncated inference is an input error unless the caller explicitly applies the no-answer policy below. `example/expected.json` lists the principal diagnostics for the runnable example.
+In reviewed mode, `review_required` and a null score mean necessary unmatched positions have not been adjudicated; they represent neither a scored zero nor an evidence-uncertain exemption. Completed malformed output is a format error with zero matching credit. Failed or truncated inference is an input error unless the caller explicitly applies the no-answer policy below. `assets/examples/expected.json` lists the principal diagnostics for the runnable example.
 
 ## Separate-file and batch evaluation
 
-`score.py --gold gold.json --prediction answer.json --time on --mode raw` reads the two documents separately. Prediction input may be a JSON document or a complete raw answer string stored as text. It must contain the answer, not an API response envelope. Extracting an envelope's content is the caller's responsibility; never rewrite its meaning.
+`python -m decisiontracebench score --gold gold.json --prediction answer.json --time on --mode raw` reads the two documents separately. Prediction input may be a JSON document or a complete raw answer string stored as text. It must contain the answer, not an API response envelope. Extracting an envelope's content is the caller's responsibility; never rewrite its meaning.
 
-With `--mode reviewed`, `--reviews reviews.json` accepts only the three optional arrays listed above. It cannot replace gold, prediction, time mode or inference status. See `example/reviews.json`.
+With `--mode reviewed`, `--reviews reviews.json` accepts only the three optional arrays listed above. It cannot replace gold, prediction, time mode or inference status. See `assets/examples/reviews.json`.
 
 `--manifest manifest.json` instead accepts:
 
@@ -77,6 +77,6 @@ With `--mode reviewed`, `--reviews reviews.json` accepts only the three optional
 
 Paths are relative to the manifest directory, or absolute paths explicitly supplied by the caller. IDs must be unique; the batch must use one declared time condition and one scoring mode. Output contains per-sample results and a macro summary. Existing output files are not overwritten. Return code 2 reports errors or missing review; no partial-cohort final score is produced.
 
-For a fixed-cohort **no-answer-counted-zero** protocol, explicitly set `inference_status` to `no_answer`, omit `prediction` (or set it to null in a combined case), and pass `--no-answer-policy zero`. `score.py` validates the gold, emits a separate `no_answer_counted_zero` outcome and includes zero in the recording-macro mean. The default policy is `error`. Pending runs, absent files and existing malformed answers are not automatically reclassified as no-answer. The lower-level `decisiontracebench.evaluation.evaluate` interface accepts only completed answers; use `score.py` for no-answer handling and batch aggregation.
+For a fixed-cohort **no-answer-counted-zero** protocol, explicitly set `inference_status` to `no_answer`, omit `prediction` (or set it to null in a combined case), and pass `--no-answer-policy zero`. `python -m decisiontracebench score` validates the gold, emits a separate `no_answer_counted_zero` outcome and includes zero in the recording-macro mean. The default policy is `error`. Pending runs, absent files and existing malformed answers are not automatically reclassified as no-answer. The lower-level `decisiontracebench.evaluation.evaluate` interface accepts only completed answers; use `python -m decisiontracebench score` for no-answer handling and batch aggregation.
 
 `summary.dcist_percent` uses a 0–100 scale; `summary.recording_macro_f1` and per-sample `f1` use 0–1. In raw mode these refer to the raw baseline; only reviewed mode applies supplied exemptions and semantic correspondences. The nested `details` object may report pending reviews that do not affect raw-mode scoring.

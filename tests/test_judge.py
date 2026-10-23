@@ -66,14 +66,14 @@ class JudgeTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
         self.run = self.root / 'run'
-        self.case = json.loads((ROOT / 'example' / 'case.json').read_text(encoding='utf-8'))
+        self.case = json.loads((ROOT / 'assets' / 'examples' / 'case.json').read_text(encoding='utf-8'))
         self.case = j.clean_case(self.case)
 
     def tearDown(self):
         self.temp.cleanup()
 
     def plan(self):
-        j.prepare(ROOT / 'example' / 'judge_manifest.json', self.run)
+        j.prepare(ROOT / 'assets' / 'examples' / 'judge_manifest.json', self.run)
         return j.read_json(self.run / 'plan.json')
 
     def sample(self):
@@ -81,11 +81,11 @@ class JudgeTests(unittest.TestCase):
 
     def test_prepare_no_network_and_prompt_fidelity(self):
         with patch('urllib.request.OpenerDirector.open', side_effect=AssertionError('No network')):
-            report = j.prepare(ROOT / 'example' / 'judge_manifest.json', self.run)
+            report = j.prepare(ROOT / 'assets' / 'examples' / 'judge_manifest.json', self.run)
         self.assertEqual(report['network_calls'], 0)
         plan = j.read_json(self.run / 'plan.json')
         for name in ('semantic_equivalence', 'extra_nodes'):
-            self.assertEqual(plan['prompts'][name], (ROOT / 'prompts' / (name + '.txt')).read_text(encoding='utf-8'))
+            self.assertEqual(plan['prompts'][name], (ROOT / 'assets' / 'prompts' / (name + '.txt')).read_text(encoding='utf-8'))
 
     def test_complete_pipeline_and_offline_score(self):
         self.plan()
@@ -292,12 +292,12 @@ class JudgeTests(unittest.TestCase):
     def test_blank_config_is_not_a_credential(self):
         with patch.dict(os.environ, {}, clear=True):
             with self.assertRaises(ReviewError):
-                load_config(ROOT / 'judge_config.example.json')
+                load_config(ROOT / 'assets' / 'configs' / 'judge_config.example.json')
 
     def test_environment_configuration_and_redaction(self):
         with patch.dict(os.environ, {'DTB_API_KEY': 'test-placeholder-only',
                                      'DTB_BASE_URL': 'https://example.invalid/v1', 'DTB_MODEL': 'mock'}):
-            config = load_config(ROOT / 'judge_config.example.json')
+            config = load_config(ROOT / 'assets' / 'configs' / 'judge_config.example.json')
         client = ChatClient(config)
         self.assertEqual(client.endpoint, 'https://example.invalid/v1/chat/completions')
         redacted = client.redact({'text': 'test-placeholder-only https://example.invalid/v1',
@@ -333,7 +333,7 @@ class JudgeTests(unittest.TestCase):
         self.assertEqual(request.get_header('Authorization'), 'Bearer test-placeholder-only')
 
     def test_fictional_inputs_unchanged(self):
-        paths = [ROOT / 'example' / n for n in ('gold.json', 'prediction.json', 'actual_input.txt')]
+        paths = [ROOT / 'assets' / 'examples' / n for n in ('gold.json', 'prediction.json', 'actual_input.txt')]
         before = [p.read_bytes() for p in paths]
         self.plan()
         j.run_pipeline(self.run, FakeClient())
@@ -343,8 +343,8 @@ class JudgeTests(unittest.TestCase):
         self.run.mkdir()
         lock = self.run / 'run.lock'
         lock.write_text('999999', encoding='utf-8')
-        result = subprocess.run([sys.executable, '-B', str(ROOT / 'judge.py'), 'prepare',
-                                 '--manifest', str(ROOT / 'example' / 'judge_manifest.json'),
+        result = subprocess.run([sys.executable, '-B', '-m', 'decisiontracebench', 'judge', 'prepare',
+                                 '--manifest', str(ROOT / 'assets' / 'examples' / 'judge_manifest.json'),
                                  '--run-dir', str(self.run)], capture_output=True)
         self.assertEqual(result.returncode, 2)
         self.assertTrue(lock.exists())
@@ -410,10 +410,10 @@ class JudgeTests(unittest.TestCase):
         self.assertFalse((self.run / 'reviews').exists())
 
     def test_malformed_prediction_does_not_call_judge(self):
-        manifest = json.loads((ROOT / 'example' / 'judge_manifest.json').read_text(encoding='utf-8'))
+        manifest = json.loads((ROOT / 'assets' / 'examples' / 'judge_manifest.json').read_text(encoding='utf-8'))
         spec = manifest['samples'][0]
         for name in ('gold', 'generation_query', 'actual_input'):
-            spec[name] = str(ROOT / 'example' / spec[name])
+            spec[name] = str(ROOT / 'assets' / 'examples' / spec[name])
         answer = self.root / 'malformed.txt'
         answer.write_text('{broken', encoding='utf-8')
         spec['prediction'] = str(answer)

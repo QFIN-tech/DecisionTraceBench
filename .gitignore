@@ -1,10 +1,25 @@
+# Python bytecode, test/tool caches and coverage
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.ipynb_checkpoints/
 .coverage
+.coverage.*
+coverage.xml
 htmlcov/
+
+# Local environments and build output
 .venv/
 venv/
+build/
+dist/
+*.egg-info/
+
+# Credentials and local configuration (keep blank templates public)
 .env
 .env.*
 !.env.example
@@ -24,6 +39,8 @@ runs/
 judge_config.json
 judge_config.local*.json
 checkpoints/
+
+# Dataset/media/model artifacts
 *.wav
 *.flac
 *.mp3
@@ -34,5 +51,7 @@ checkpoints/
 *.pth
 *.zip
 *.tar*
+
+# Operating-system metadata
 .DS_Store
 Thumbs.db

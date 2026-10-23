@@ -25,7 +25,7 @@ Python **3.10 or newer**. The scorer uses the Python standard library. The comma
 Run the tests from the repository root:
 
 ```sh
-uv run --no-project python run_tests.py
+uv run --no-project python -B -m unittest discover -s tests -v
 ```
 
 Run Python without `-O` so that input-validation assertions remain enabled.
@@ -37,13 +37,13 @@ Run Python without `-O` so that input-validation assertions remain enabled.
 Use `raw` mode for exact matching with monetary normalization:
 
 ```sh
-uv run --no-project python score.py --mode raw --gold example/gold.json --prediction example/prediction.json --time on
+uv run --no-project python -m decisiontracebench score --mode raw --gold assets/examples/gold.json --prediction assets/examples/prediction.json --time on
 ```
 
 Use `reviewed` mode to apply semantic mappings and extra-event decisions:
 
 ```sh
-uv run --no-project python score.py --mode reviewed --gold example/gold.json --prediction example/prediction.json --reviews example/reviews.json --time on
+uv run --no-project python -m decisiontracebench score --mode reviewed --gold assets/examples/gold.json --prediction assets/examples/prediction.json --reviews assets/examples/reviews.json --time on
 ```
 
 The example illustrates how approved semantic equivalence and an exempt additional trajectory affect scoring: raw F1 is `0`, reviewed F1 is `1`, and the exempt-extra-node ratio is `1/3`.
@@ -51,7 +51,7 @@ The example illustrates how approved semantic equivalence and an exempt addition
 ### Evaluate a batch
 
 ```sh
-uv run --no-project python score.py --mode reviewed --manifest example/manifest.json --output results/example.json
+uv run --no-project python -m decisiontracebench score --mode reviewed --manifest assets/examples/manifest.json --output results/example.json
 ```
 
 Input paths in a manifest are resolved relative to the manifest directory. Each sample must have a unique ID, and all samples in a batch must use the same temporal-evaluation setting.
@@ -61,7 +61,7 @@ Input paths in a manifest are resolved relative to the manifest directory. Each 
 A case file can contain the gold, prediction, settings and adjudications together:
 
 ```sh
-uv run --no-project python score.py --mode reviewed --case example/case.json
+uv run --no-project python -m decisiontracebench score --mode reviewed --case assets/examples/case.json
 ```
 
 ## Automatic semantic and extra-event review
@@ -69,13 +69,13 @@ uv run --no-project python score.py --mode reviewed --case example/case.json
 To generate adjudications rather than supply an existing review file, prepare a review manifest with the prediction, GT, task query and source evidence:
 
 ```sh
-uv run --no-project python judge.py prepare --manifest example/judge_manifest.json --run-dir runs/example
+uv run --no-project python -m decisiontracebench judge prepare --manifest assets/examples/judge_manifest.json --run-dir runs/example
 ```
 
-This command makes no API calls. Copy `judge_config.example.json` to `judge_config.json` and fill your `api_key`, `base_url` and `model`. Then run:
+This command makes no API calls. Copy `assets/configs/judge_config.example.json` to `assets/configs/judge_config.json` and fill your `api_key`, `base_url` and `model`. Then run:
 
 ```sh
-uv run --no-project python judge.py run --run-dir runs/example --config judge_config.json --workers 4 --max-requests 100
+uv run --no-project python -m decisiontracebench judge run --run-dir runs/example --config assets/configs/judge_config.json --workers 4 --max-requests 100
 ```
 
 The run command sends the prepared evidence to your configured service and may incur charges. It reviews field correspondences, scope/value equivalence, and extra events in order, then computes DCIST. Successful requests are reused on resume; failed or incomplete requests require explicit retry. Missing decisions are not automatically exempted.
@@ -162,19 +162,18 @@ Exit code `0` indicates completed scoring; `2` indicates an input error or pendi
 ## Repository structure
 
 ```text
-score.py          Single-sample and batch CLI
-judge.py          Automatic adjudication and scoring CLI
-decisiontracebench/  Scoring library, matching and adjudication modules
-docs/             Scoring protocol and file formats
-prompts/          Task and adjudication queries
-example/          Runnable examples
-tests/            Regression tests
-run_tests.py      Test runner
+decisiontracebench/  Python package and module CLI
+assets/
+  configs/          Configuration templates
+  examples/         Runnable fictional examples
+  prompts/          Task and adjudication prompts
+docs/               Scoring protocol and file formats
+tests/              Offline regression tests
 ```
 
 ## Python library
 
-The root scripts are CLI entry points. Python callers can use `decisiontracebench.scoring.score_case` and `aggregate` directly. The package separates `evaluation` (review validation), `matching` (ordered alignment and trajectory matching), `schema`/`structure`, `money`/`quantities`/`timing`, and `judge_client`/`judge_pipeline`. `historical_reviews` reads archived candidate catalogs and is separate from the current CLI workflow.
+Use `python -m decisiontracebench score` or `python -m decisiontracebench judge` as the CLI entry points. Python callers can use `decisiontracebench.scoring.score_case` and `aggregate` directly. The package separates `evaluation` (review validation), `matching` (ordered alignment and trajectory matching), `schema`/`structure`, `money`/`quantities`/`timing`, and `judge_client`/`judge_pipeline`. `historical_reviews` reads archived candidate catalogs and is separate from the current CLI workflow.
 
 ## Citation
 

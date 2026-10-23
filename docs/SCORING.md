@@ -39,7 +39,7 @@ For recording i, let G_i be the gold trajectory count, P_i the raw prediction co
 
 `F1_i = 2 TP_i / (G_i + P_i - L_i)`.
 
-The main **DCIST is recording-macro F1**: `100 * mean(F1_i)` on a declared cohort. Global micro-F1 pools the numerator and denominator before division and is a separate statistic. Evaluation requires completed answers by default. For a fixed cohort, `score.py` also supports an explicit no-answer-zero policy, with those cases separately labeled and counted; see [input and output reference](FORMAT.md). Completed malformed answers are scored as format errors. Missing adjudications leave the reviewed aggregate unset rather than changing the cohort.
+The main **DCIST is recording-macro F1**: `100 * mean(F1_i)` on a declared cohort. Global micro-F1 pools the numerator and denominator before division and is a separate statistic. Evaluation requires completed answers by default. For a fixed cohort, `python -m decisiontracebench score` also supports an explicit no-answer-zero policy, with those cases separately labeled and counted; see [input and output reference](FORMAT.md). Completed malformed answers are scored as format errors. Missing adjudications leave the reviewed aggregate unset rather than changing the cohort.
 
 The extra-node ratio is the number of distinct exempt node coordinates divided by the number of predicted nodes. Nodes selected as required matches are removed from the exemption union. New-track nodes are counted once, not once as a track and again as a node. This measures output granularity, not hallucination rate. It never compensates for a missing required trajectory. The scorer reports no extra-node ratio for a malformed answer.
 
