@@ -1,0 +1,10 @@
+{
+  "api_key": "",
+  "base_url": "",
+  "model": "",
+  "timeout_seconds": 180,
+  "max_tokens": 8192,
+  "temperature": 0,
+  "token_limit_field": "max_tokens",
+  "json_mode": false
+}

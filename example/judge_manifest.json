@@ -1,0 +1,13 @@
+{
+  "samples": [
+    {
+      "sample_id": "example_001",
+      "gold": "gold.json",
+      "prediction": "prediction.json",
+      "generation_query": "task_query.txt",
+      "actual_input": "actual_input.txt",
+      "time_enabled": true,
+      "inference_status": "completed"
+    }
+  ]
+}

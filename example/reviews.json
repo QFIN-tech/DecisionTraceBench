@@ -1,0 +1,40 @@
+{
+  "semantic_decisions": [
+    {
+      "candidate_id": "toy_value_1",
+      "dimension": "value",
+      "gold_track_index": 0,
+      "prediction_track_index": 0,
+      "cycle_index": 0,
+      "gold_event_index": 1,
+      "prediction_event_index": 1,
+      "gold": {
+        "code": "guarantee_conditions_met"
+      },
+      "prediction": {
+        "code": "担保条件已满足"
+      },
+      "verdict": "equivalent",
+      "reason": "Both expressions denote satisfaction of the guarantee condition in the same documentary-verification scope. Neither asserts formal credit approval.",
+      "evidence_quote": "合同和签章都核过了，担保条件已经满足。"
+    }
+  ],
+  "node_decisions": [
+    {
+      "prediction_track_index": 1,
+      "cycle_index": 0,
+      "event_index": 0,
+      "label": "exempt_extra",
+      "reason": "The source explicitly confirms a separate receipt amount; it is not one of the fixture's minimum required anchors and does not contradict them.",
+      "rule_quote": "首个有效事件已挂起或已定案时，允许直接hold或settle，不虚构start。",
+      "evidence_quote": "另外，保证金到账5万元，银行回单也核实了。"
+    }
+  ],
+  "track_decisions": [
+    {
+      "prediction_track_index": 1,
+      "label": "exempt_new_track",
+      "reason": "This supported, separately verified receipt is absent from the fixture gold; its only node has been explicitly reviewed as exempt_extra."
+    }
+  ]
+}

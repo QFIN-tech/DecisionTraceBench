@@ -1,0 +1,12 @@
+{
+  "samples": [
+    {
+      "sample_id": "constructed_example",
+      "gold": "gold.json",
+      "prediction": "prediction.json",
+      "reviews": "reviews.json",
+      "time_enabled": true,
+      "inference_status": "completed"
+    }
+  ]
+}

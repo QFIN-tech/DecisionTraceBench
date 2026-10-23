@@ -1,0 +1,2 @@
+# Python >= 3.10. All scoring code and tests use the standard library.
+# No third-party Python packages are required.

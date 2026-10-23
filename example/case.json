@@ -1,0 +1,165 @@
+{
+  "example_kind": "constructed_software_fixture",
+  "inference_status": "completed",
+  "time_enabled": true,
+  "context_for_review_only": [
+    {
+      "speaker_id": "S1",
+      "start_ms": 0,
+      "end_ms": 3000,
+      "text": "先核对这份保证合同，担保条件还没核完。"
+    },
+    {
+      "speaker_id": "S2",
+      "start_ms": 4000,
+      "end_ms": 7000,
+      "text": "合同和签章都核过了，担保条件已经满足。"
+    },
+    {
+      "speaker_id": "S2",
+      "start_ms": 8000,
+      "end_ms": 11000,
+      "text": "另外，保证金到账5万元，银行回单也核实了。"
+    }
+  ],
+  "context_note": "S2 performs the stated documentary verification. Times are constructed fixture coordinates. The third statement is a supported gold-absent track used to demonstrate the exemption mechanism.",
+  "gold": {
+    "tracks": [
+      {
+        "entity_id": "conditions",
+        "field_id": "guarantee_status",
+        "cycles": [
+          {
+            "cycle_id": "C1",
+            "events": [
+              {
+                "event_id": "G1",
+                "action": "start",
+                "speaker_id": "S1",
+                "value": null,
+                "source_event_id": null,
+                "scope_id": "document_verification",
+                "start_ms": 0,
+                "end_ms": 3000
+              },
+              {
+                "event_id": "G2",
+                "action": "settle",
+                "speaker_id": "S2",
+                "value": {
+                  "code": "guarantee_conditions_met"
+                },
+                "source_event_id": "G1",
+                "scope_id": "document_verification",
+                "start_ms": 4000,
+                "end_ms": 7000,
+                "result": "accepted"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "prediction": {
+    "tracks": [
+      {
+        "entity_id": "conditions",
+        "field_id": "guarantee_status",
+        "cycles": [
+          {
+            "cycle_id": "prediction_cycle",
+            "events": [
+              {
+                "event_id": "P1",
+                "action": "start",
+                "speaker_id": "S1",
+                "value": null,
+                "source_event_id": null,
+                "scope_id": "document_verification",
+                "start_ms": 0,
+                "end_ms": 3000
+              },
+              {
+                "event_id": "P2",
+                "action": "settle",
+                "speaker_id": "S2",
+                "value": {
+                  "code": "担保条件已满足"
+                },
+                "source_event_id": "P1",
+                "scope_id": "document_verification",
+                "start_ms": 4000,
+                "end_ms": 7000,
+                "result": "accepted"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "entity_id": "bank_receipt",
+        "field_id": "received_amount",
+        "cycles": [
+          {
+            "cycle_id": "C1",
+            "events": [
+              {
+                "event_id": "P3",
+                "action": "settle",
+                "speaker_id": "S2",
+                "value": {
+                  "number": "5",
+                  "unit": "万元"
+                },
+                "source_event_id": null,
+                "scope_id": "bank_receipt_verification",
+                "start_ms": 8000,
+                "end_ms": 11000,
+                "result": "accepted"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "semantic_decisions": [
+    {
+      "candidate_id": "toy_value_1",
+      "dimension": "value",
+      "gold_track_index": 0,
+      "prediction_track_index": 0,
+      "cycle_index": 0,
+      "gold_event_index": 1,
+      "prediction_event_index": 1,
+      "gold": {
+        "code": "guarantee_conditions_met"
+      },
+      "prediction": {
+        "code": "担保条件已满足"
+      },
+      "verdict": "equivalent",
+      "reason": "Both expressions denote satisfaction of the guarantee condition in the same documentary-verification scope. Neither asserts formal credit approval.",
+      "evidence_quote": "合同和签章都核过了，担保条件已经满足。"
+    }
+  ],
+  "node_decisions": [
+    {
+      "prediction_track_index": 1,
+      "cycle_index": 0,
+      "event_index": 0,
+      "label": "exempt_extra",
+      "reason": "The source explicitly confirms a separate receipt amount; it is not one of the fixture's minimum required anchors and does not contradict them.",
+      "rule_quote": "首个有效事件已挂起或已定案时，允许直接hold或settle，不虚构start。",
+      "evidence_quote": "另外，保证金到账5万元，银行回单也核实了。"
+    }
+  ],
+  "track_decisions": [
+    {
+      "prediction_track_index": 1,
+      "label": "exempt_new_track",
+      "reason": "This supported, separately verified receipt is absent from the fixture gold; its only node has been explicitly reviewed as exempt_extra."
+    }
+  ]
+}

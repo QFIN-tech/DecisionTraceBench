@@ -6,6 +6,8 @@
 
 决策关键信息状态跟踪（Decision-Critical Information State Tracking，DCIST）评估模型从多人对话中恢复完整决策状态轨迹的能力。轨迹匹配要求事件序列、动作、说话人归属、作用域、值和时间证据均满足评测要求。
 
+数据集地址：[Hugging Face 上的 QFIN/DecisionTraceBench](https://huggingface.co/datasets/QFIN/DecisionTraceBench)。数据独立分发，实际可用内容以该仓库文件列表为准。已准备的人工录音子集含 26 份录音（8.61 小时）、308 条轨迹和 562 个事件，不含转写文本及论文中的合成子集。
+
 ## 功能
 
 - 有序事件对齐与轨迹一对一匹配。
@@ -18,12 +20,12 @@
 
 ## 环境要求
 
-Python **3.10 及以上**，仅依赖 Python 标准库。
+Python **3.10 及以上**，仅依赖 Python 标准库。以下命令使用 [uv](https://docs.astral.sh/uv/)。
 
 在仓库根目录运行测试：
 
 ```sh
-python run_tests.py
+uv run --no-project python run_tests.py
 ```
 
 请勿使用 `python -O`，以保留输入校验所需的断言。
@@ -35,13 +37,13 @@ python run_tests.py
 使用 `raw` 模式进行精确匹配，包含金额等价归一化：
 
 ```sh
-python score.py --mode raw --gold example/gold.json --prediction example/prediction.json --time on
+uv run --no-project python score.py --mode raw --gold example/gold.json --prediction example/prediction.json --time on
 ```
 
 使用 `reviewed` 模式应用语义对应关系和额外节点裁定：
 
 ```sh
-python score.py --mode reviewed --gold example/gold.json --prediction example/prediction.json --reviews example/reviews.json --time on
+uv run --no-project python score.py --mode reviewed --gold example/gold.json --prediction example/prediction.json --reviews example/reviews.json --time on
 ```
 
 示例演示语义等价和额外轨迹免罚对计分的影响：原始 F1 为 `0`，审核后 F1 为 `1`，免罚额外节点比例为 `1/3`。
@@ -49,7 +51,7 @@ python score.py --mode reviewed --gold example/gold.json --prediction example/pr
 ### 批量评分
 
 ```sh
-python score.py --mode reviewed --manifest example/manifest.json --output results/example.json
+uv run --no-project python score.py --mode reviewed --manifest example/manifest.json --output results/example.json
 ```
 
 清单中的相对路径以清单所在目录为基准。每个样本须有唯一 ID，同一批次采用一致的时间评测设置。
@@ -59,7 +61,7 @@ python score.py --mode reviewed --manifest example/manifest.json --output result
 也可以将金标、预测、评测设置和裁定记录放在同一个文件中：
 
 ```sh
-python score.py --mode reviewed --case example/case.json
+uv run --no-project python score.py --mode reviewed --case example/case.json
 ```
 
 ## 自动同义复核与额外节点裁定
@@ -67,18 +69,20 @@ python score.py --mode reviewed --case example/case.json
 如需自动生成裁定，先准备包含预测、GT、生成 Query 和原文证据的审核清单：
 
 ```sh
-python judge.py prepare --manifest example/judge_manifest.json --run-dir runs/example
+uv run --no-project python judge.py prepare --manifest example/judge_manifest.json --run-dir runs/example
 ```
 
 此步骤不调用接口。将 `judge_config.example.json` 复制为 `judge_config.json`，填写自己的 `api_key`、`base_url` 和 `model`，然后运行：
 
 ```sh
-python judge.py run --run-dir runs/example --config judge_config.json --workers 4 --max-requests 100
+uv run --no-project python judge.py run --run-dir runs/example --config judge_config.json --workers 4 --max-requests 100
 ```
 
 运行时会将准备好的证据发送给所配置的服务，可能产生接口费用。流程依次进行字段对应、作用域与值的同义复核、额外节点裁定，最后由脚本计算 DCIST。支持并发和请求数上限；续跑复用成功请求，失败或未完整返回的请求需显式重试，未审核项不会自动免罚。
 
 完整 Query、输入要求、配置和续跑方法见 [自动审核说明](docs/AUTO_REVIEW.md)。
+
+自动流程使用一个配置的裁定模型，不自动执行论文中的第二模型顺序复核和分歧人工定案。复现论文分数需要对应的固定样本集、预测及最终裁定记录；重新运行裁定会产生新的判断。
 
 ## 输入格式
 
@@ -175,3 +179,5 @@ run_tests.py      测试入口
 ## 许可证
 
 本项目采用 [MIT License](LICENSE)。
+
+独立分发的人工录音包标注为 CC BY 4.0。本代码许可证不改变音频或金标许可；合成音频和第三方声音资源须单独遵循来源许可。

@@ -1,0 +1,63 @@
+{
+  "tracks": [
+    {
+      "entity_id": "conditions",
+      "field_id": "guarantee_status",
+      "cycles": [
+        {
+          "cycle_id": "prediction_cycle",
+          "events": [
+            {
+              "event_id": "P1",
+              "action": "start",
+              "speaker_id": "S1",
+              "value": null,
+              "source_event_id": null,
+              "scope_id": "document_verification",
+              "start_ms": 0,
+              "end_ms": 3000
+            },
+            {
+              "event_id": "P2",
+              "action": "settle",
+              "speaker_id": "S2",
+              "value": {
+                "code": "担保条件已满足"
+              },
+              "source_event_id": "P1",
+              "scope_id": "document_verification",
+              "start_ms": 4000,
+              "end_ms": 7000,
+              "result": "accepted"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "entity_id": "bank_receipt",
+      "field_id": "received_amount",
+      "cycles": [
+        {
+          "cycle_id": "C1",
+          "events": [
+            {
+              "event_id": "P3",
+              "action": "settle",
+              "speaker_id": "S2",
+              "value": {
+                "number": "5",
+                "unit": "万元"
+              },
+              "source_event_id": null,
+              "scope_id": "bank_receipt_verification",
+              "start_ms": 8000,
+              "end_ms": 11000,
+              "result": "accepted"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

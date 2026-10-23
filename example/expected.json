@@ -1,0 +1,9 @@
+{
+  "status": "complete",
+  "raw_score": {"tp": 0, "gold": 1, "pred": 2, "precision": 0.0, "recall": 0.0, "f1": 0.0},
+  "reviewed_score": {"tp": 1, "gold": 1, "pred": 1, "precision": 1.0, "recall": 1.0, "f1": 1.0},
+  "dcist": 1.0,
+  "extra_node_count": 1,
+  "node_count": 3,
+  "extra_node_ratio": 0.3333333333333333
+}

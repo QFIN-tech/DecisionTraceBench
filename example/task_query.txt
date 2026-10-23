@@ -1,0 +1,19 @@
+根据输入对话恢复决策状态轨迹，只输出合法JSON。
+本文件定义虚构程序示例的任务，不包含真实数据集样本。
+
+每个(entity_id,field_id)是一条轨迹，包含按序排列的cycles与events。
+本示例允许的字段：
+- conditions / guarantee_status：保证条件核对状态；value为null、code对象或等义中文表达。
+- bank_receipt / received_amount：银行回单核验的到账金额；value为number字符串与unit组成的对象。
+本示例允许的作用域：document_verification、bank_receipt_verification。
+
+动作使用start、advance、hold、settle。start表示首次建立候选信息，advance表示实际推进，hold表示因明确阻断而暂停，settle表示在对应作用域形成明确结论。
+普通提问、闲聊、无变化复述不建事件。首个有效事件已挂起或已定案时，允许直接hold或settle，不虚构start。
+已暂停时，目标值或纳入评测的关键条件发生实质变化而仍暂停，可以再记hold；重复等待不新增节点。
+只有明确重开才建新周期，settle必须是本周期末节点。
+event_id在本样本内唯一；每个周期首节点source_event_id为null，其余指向同周期上一节点。
+speaker_id保留输入的S1、S2标签，不重分配说话人。
+start_ms、end_ms使用录音起点的整数毫秒，定位触发发言。
+result仅在settle时填写accepted、rejected、withdrawn或revoked。
+保留全部证据支持的组成项、金额、单位和权限条件，不补充缺失事实。
+输出对象包含tracks；轨迹包含entity_id、field_id、cycles；周期包含cycle_id、events。
