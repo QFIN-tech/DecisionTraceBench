@@ -1,5 +1,7 @@
 # DecisionTraceBench
 
+![DecisionTraceBench — Right answer. Wrong trace.](assets/decisiontracebench-banner.png)
+
 DecisionTraceBench 是面向多人对话中决策关键信息跟踪的语音评测基准。它以中文金融对话为场景，评估信息从提出、修订、暂停到定案的完整过程，以及对应的说话人归属、业务作用域和时间证据。基准通过结构化轨迹标注、任务提示词和评测脚本，为学术界与产业界开展可追溯语音理解研究提供共同的评测基础。
 
 🤗 [Hugging Face](https://huggingface.co/datasets/QFIN/DecisionTraceBench)   |   🌐 [English](README.md)
@@ -183,4 +185,4 @@ tests/              Offline regression tests
 
 本仓库的代码、提示词和说明文档采用 [知识共享署名—非商业性使用 4.0 国际许可协议（CC BY-NC 4.0）](LICENSE)。
 
-独立分发的合成子集采用 CC BY-NC 4.0；人工录音子集保留其单独标注的 CC BY 4.0。请以各数据子集附带的许可为准，第三方声音资源仍须遵循其来源许可。
+独立分发的人工录音和合成子集同样采用 CC BY-NC 4.0；第三方声音资源仍须遵循其来源许可。

@@ -1,5 +1,7 @@
 # DecisionTraceBench
 
+![DecisionTraceBench — Right answer. Wrong trace.](assets/decisiontracebench-banner.png)
+
 DecisionTraceBench is a speech benchmark for tracking decision-critical information in multi-party conversations. Grounded in Chinese financial dialogues, it evaluates how information is introduced, revised, suspended and settled, together with speaker attribution, business scope and temporal evidence. It aims to support collaboration between academia and industry on traceable speech understanding through structured trajectory annotations, task prompts and evaluation scripts.
 
 🤗 [Hugging Face](https://huggingface.co/datasets/QFIN/DecisionTraceBench)   |   🌐 [简体中文](README.zh-CN.md)
@@ -183,4 +185,4 @@ If you use this code, please cite **DecisionTraceBench: Tracking Decision-Critic
 
 The code, prompts and documentation in this repository are licensed under [Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)](LICENSE).
 
-The separately distributed synthetic subset uses CC BY-NC 4.0. The human-recording subset retains its separately stated CC BY 4.0 license. Follow the license accompanying each dataset subset; third-party voice resources remain subject to their source licenses.
+The separately distributed human-recording and synthetic subsets also use CC BY-NC 4.0. Third-party voice resources remain subject to their source licenses.
