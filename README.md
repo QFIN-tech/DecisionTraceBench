@@ -181,6 +181,6 @@ If you use this code, please cite **DecisionTraceBench: Tracking Decision-Critic
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+The code, prompts and documentation in this repository are licensed under [Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)](LICENSE).
 
-The separately distributed human-recording package specifies CC BY 4.0. This code license does not relicense audio or annotations. Synthetic audio and third-party voice resources have separate source-license requirements.
+The separately distributed synthetic subset uses CC BY-NC 4.0. The human-recording subset retains its separately stated CC BY 4.0 license. Follow the license accompanying each dataset subset; third-party voice resources remain subject to their source licenses.
