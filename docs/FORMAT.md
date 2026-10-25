@@ -2,7 +2,7 @@
 
 ## Model answer
 
-The answer is a JSON object containing `tracks`. Each track has `entity_id`, `field_id`, and ordered `cycles`. A cycle contains `cycle_id` and ordered `events`.
+The answer is a JSON object containing `tracks`. Each track has `entity_id`, `field_id`, and ordered `cycles`. A cycle contains ordered `events`; its position in the `cycles` array identifies it.
 
 An event contains:
 
@@ -19,7 +19,7 @@ An event contains:
 
 Define the field and scope vocabulary in the task protocol. The scorer compares the supplied gold and prediction using those labels and any approved correspondences. Schema validation checks the structure of an answer; semantic and extra-node adjudications assess its content against the task rules and evidence.
 
-Cycle labels and event labels are identifiers, not semantic answers. Cycle number/order, event order, and predecessor relations remain constrained. `settle` must end a cycle. An initial `hold` or `settle` is permitted when supported; an invented `start` is not required. `reason` and `derived_final_state` are auxiliary fields and do not enter the main trajectory match.
+Predictions do not need `cycle_id`. Existing gold files and older predictions may retain it as ignored metadata; the scorer preserves compatibility with them. Omitting or changing this label does not merge cycles or relax cycle count/order. Event IDs remain required for predecessor links, but their literal spelling need not equal gold. Event order and predecessor relations remain constrained. `settle` must end a cycle. An initial `hold` or `settle` is permitted when supported; an invented `start` is not required. `reason` and `derived_final_state` are auxiliary fields and do not enter the main trajectory match.
 
 ## Combined case file
 

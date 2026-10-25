@@ -8,7 +8,16 @@ DecisionTraceBench is a speech benchmark for tracking decision-critical informat
 
 Decision-Critical Information State Tracking (DCIST) evaluates the recovery of complete decision-state trajectories from multi-party conversations. A trajectory match requires the correct event sequence, actions, speaker attribution, scope, values and temporal evidence.
 
-Data is distributed separately on Hugging Face; check that repository's current files for availability. The prepared human-performed subset contains 26 recordings (8.61 hours), 308 trajectories and 562 events. It excludes transcripts and the paper's synthetic subset.
+Both dataset subsets are available on [Hugging Face](https://huggingface.co/datasets/QFIN/DecisionTraceBench):
+
+| Subset | Recordings | Hours | Trajectories | Events |
+|---|---:|---:|---:|---:|
+| Human-performed | 26 | 8.61 | 308 | 562 |
+| Synthetic | 2,246 | 100.39 | 5,319 | 18,227 |
+
+Both are fixed research evaluation cohorts without training/development splits. Transcripts and construction scripts are not distributed. The paper's main human-audio comparison uses a common cohort of 25 recordings, distinct from the complete 26-recording human release.
+
+For paper-comparable prediction, both subsets use the same global vocabulary: **193 entity–field pairs and 64 scopes**. Use the complete task templates below or the [shared vocabulary](https://huggingface.co/datasets/QFIN/DecisionTraceBench/blob/main/assets/label_vocabulary.json). Subset coverage counts are not alternative inference vocabularies.
 
 ## Features
 
@@ -94,7 +103,6 @@ Gold annotations and predictions use the same JSON structure:
 tracks
   entity_id, field_id
   cycles
-    cycle_id
     events
       event_id, source_event_id
       action, speaker_id, scope_id, value
@@ -103,6 +111,8 @@ tracks
 ```
 
 Actions are `start`, `advance`, `hold` and `settle`. Event indices in adjudication records are zero-based. `--prediction` accepts a JSON answer or a complete raw answer saved as text.
+
+Cycles are identified by array position and order; predictions do not need `cycle_id`. The scorer still accepts this ignored label in original gold files and older predictions. Cycle count, boundaries and order remain constrained.
 
 A batch manifest has the following form:
 

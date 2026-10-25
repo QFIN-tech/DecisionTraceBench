@@ -10,9 +10,9 @@ start=首次提出或建立候选信息。advance=该字段发生实际推进，
 上下文继承：触发句不必重复值；指代、承接或确认关系唯一时，可以继承前文候选及“合计”“每季度”“不低于”等必要限定。不能猜最近的数字，不能把继承内容自动视为已核实或已批准，不能把未确认的其他字段一起定案，也不能用后来新决定倒填较早状态。无法唯一判断时不编造。
 value可以是null、数字单位对象、复合对象、code对象或中文文本，按附后的字段格式选择最符合发言内容的结构，不凭格式列表补造事实。数字写阿拉伯数字，number使用字符串，单位保留原话，不做数量级换算。复合值的金额、期限、状态等已获支持的组成项须全部保留；JSON对象键的书写顺序不重要，不因只匹配金额就忽略错误或缺失的期限。status、flags等若是所选格式的一部分，不擅自删除；只填写证据支持的内容。code可以使用含义明确的英文标签；无法稳妥表示时用简洁中文表达，不要为了猜英文拼写改变语义。
 scope_id从附后全局作用域词表选择，判断该发言实际影响的范围。企业申请、企业披露、各方意向、材料核验、技术审查、风险建议、正式批准、实际放款须区分。无权限者冒称决定不改变有效轨迹；不把非正式意见升级为批准。
-event_id在本样本内唯一。每个周期首节点source_event_id=null，其余节点指向本轨迹同周期上一有效节点；这些ID是内部链接，不需要猜金标编号。cycle_id可用C1、C2；周期和事件必须按真实发生顺序输出。result仅settle时给出accepted/rejected/withdrawn/revoked；其他事件不填result。
+event_id在本样本内唯一。每个周期首节点source_event_id=null，其余节点指向本轨迹同周期上一有效节点；这些ID是内部链接，不需要猜金标编号。周期由cycles数组的位置和顺序标识，无需输出cycle_id；周期和事件必须按真实发生顺序输出。result仅settle时给出accepted/rejected/withdrawn/revoked；其他事件不填result。
 不要输出时间或剧本话轮编号，不输出evidence_turn_ids。无需输出reason。
-输出结构：{"tracks":[{"entity_id":"词表中的实体ID","field_id":"对应字段ID","cycles":[{"cycle_id":"C1","events":[{"event_id":"E001","action":"start","speaker_id":"S1","value":null,"source_event_id":null,"scope_id":"词表中的作用域ID"}]}],"derived_final_state":"active"}]}。
+输出结构：{"tracks":[{"entity_id":"词表中的实体ID","field_id":"对应字段ID","cycles":[{"events":[{"event_id":"E001","action":"start","speaker_id":"S1","value":null,"source_event_id":null,"scope_id":"词表中的作用域ID"}]}],"derived_final_state":"active"}]}。
 最后事件为start/advance则最终状态active，为hold则held，为settle则settled。输出完整有效事件链，不只输出最终答案。示例占位符和null不是任何录音的答案。
 以下格式说明只定义JSON形状，string/integer等表示类型，绝非要原样输出的值。数组里的元素顺序不要任意改动；事件顺序和周期顺序尤其不能改变。
 

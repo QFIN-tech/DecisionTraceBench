@@ -8,7 +8,16 @@ DecisionTraceBench 是面向多人对话中决策关键信息跟踪的语音评�
 
 决策关键信息状态跟踪（Decision-Critical Information State Tracking，DCIST）评估模型从多人对话中恢复完整决策状态轨迹的能力。轨迹匹配要求事件序列、动作、说话人归属、作用域、值和时间证据均满足评测要求。
 
-数据在 Hugging Face 独立分发，实际可用内容以数据仓库文件列表为准。已准备的人工录音子集含 26 份录音（8.61 小时）、308 条轨迹和 562 个事件，不含转写文本及论文中的合成子集。
+两套数据均已在 [Hugging Face](https://huggingface.co/datasets/QFIN/DecisionTraceBench) 发布：
+
+| 子集 | 录音数 | 时长（小时） | 轨迹数 | 事件数 |
+|---|---:|---:|---:|---:|
+| 人工录音 | 26 | 8.61 | 308 | 562 |
+| 合成语音 | 2,246 | 100.39 | 5,319 | 18,227 |
+
+两者均为固定研究评测集，不提供训练集或开发集划分，也不分发转写文本和构造剧本。论文的人工语音主比较使用 25 份共同录音，与完整的 26 份人工录音发布集不同。
+
+为保持与论文评测条件一致，两个子集的预测输入均使用同一套全局词表：**193 个实体—字段对和 64 个作用域**。请使用完整任务模板，或读取[统一词表](https://huggingface.co/datasets/QFIN/DecisionTraceBench/blob/main/assets/label_vocabulary.json)；不能按子集实际覆盖情况缩小输入词表。
 
 ## 功能
 
@@ -94,7 +103,6 @@ uv run --no-project python -m decisiontracebench judge run --run-dir runs/exampl
 tracks
   entity_id, field_id
   cycles
-    cycle_id
     events
       event_id, source_event_id
       action, speaker_id, scope_id, value
@@ -103,6 +111,8 @@ tracks
 ```
 
 动作包括 `start`、`advance`、`hold` 和 `settle`。裁定记录中的事件索引从 0 开始。`--prediction` 支持 JSON 答案，也支持以文本文件保存的完整原始答案。
+
+周期由 `cycles` 数组的位置和顺序标识，预测无需输出 `cycle_id`。评分器仍兼容原始金标及旧预测中保留的这一辅助标签；周期数量、边界和顺序约束不变。
 
 批量清单示例：
 

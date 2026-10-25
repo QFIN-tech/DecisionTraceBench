@@ -109,7 +109,7 @@ Request directories use generated identifiers rather than arbitrary sample IDs a
 To recompute a completed sample without model calls:
 
 ```sh
-uv run --no-project python -m decisiontracebench score --mode reviewed --case runs/assets/examples/scoring_cases/sample_0001.json
+uv run --no-project python -m decisiontracebench score --mode reviewed --case runs/example/scoring_cases/sample_0001.json
 ```
 
 Exit code `0` indicates successful preparation or complete scoring. Exit code `2` indicates an input error or pending/failed adjudication. Scores from automatic review depend on the selected model and evidence; retain the response records for inspection.

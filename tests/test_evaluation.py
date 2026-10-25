@@ -40,6 +40,28 @@ class AdapterTests(unittest.TestCase):
     def test_exact(self):
         self.assertEqual(cli.evaluate(simple_case())['dcist'], 1)
 
+    def test_cycle_id_is_optional_without_relaxing_cycle_structure(self):
+        first = event('E1', value={'number': '5', 'unit': '万'}, action='settle', result='accepted')
+        second = dict(event('E2', value={'number': '6', 'unit': '万'}, action='settle', result='accepted'),
+                      start_ms=2000, end_ms=3000)
+        gold = {'tracks': [{'entity_id': 'entity', 'field_id': 'field', 'cycles': [
+            {'cycle_id': 'C1', 'events': [first]},
+            {'cycle_id': 'C2', 'events': [second]},
+        ]}]}
+        case = {'gold': gold, 'prediction': copy.deepcopy(gold),
+                'inference_status': 'completed', 'time_enabled': True}
+        baseline = cli.evaluate(case)
+        for cycle in case['prediction']['tracks'][0]['cycles']:
+            cycle.pop('cycle_id')
+        self.assertEqual(cli.evaluate(case), baseline)
+        for cycle in case['gold']['tracks'][0]['cycles']:
+            cycle.pop('cycle_id')
+        self.assertEqual(cli.evaluate(case), baseline)
+        case['prediction']['tracks'][0]['cycles'].reverse()
+        self.assertEqual(cli.evaluate(case)['raw_score']['f1'], 0)
+        case['prediction']['tracks'][0]['cycles'].pop()
+        self.assertEqual(cli.evaluate(case)['raw_score']['f1'], 0)
+
     def test_money_equivalence(self):
         c = simple_case()
         c['gold']['tracks'][0]['cycles'][0]['events'][0]['value'] = {'number':'5','unit':'万'}

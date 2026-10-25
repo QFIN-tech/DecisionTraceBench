@@ -2,7 +2,7 @@
 
 ## Full-trajectory match
 
-A correct trajectory covers every minimum gold event in the same cycle and order, matching action, speaker, scope, complete value, applicable time evidence, and settlement result. Event/cycle ID spelling is immaterial, but internal predecessor links must be valid. A missing required event cannot be recovered by exempting other nodes. Cycle boundaries are not merged.
+A correct trajectory covers every minimum gold event in the same cycle and order, matching action, speaker, scope, complete value, applicable time evidence, and settlement result. Event ID spelling is immaterial, but internal predecessor links must be valid. Cycles are identified by array position and order; `cycle_id` is unnecessary and ignored if retained in legacy files. A missing required event cannot be recovered by exempting other nodes. Cycle boundaries are not merged.
 
 The implementation aligns ordered events and performs maximum one-to-one matching between gold and predicted trajectories. One prediction cannot recover two gold trajectories, nor can two predictions generate two true positives for one gold trajectory. When maximum-match solutions tie, the deterministic matching prefers solutions that do not unnecessarily reinstate a previously exempt new trajectory.
 

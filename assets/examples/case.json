@@ -30,7 +30,6 @@
         "field_id": "guarantee_status",
         "cycles": [
           {
-            "cycle_id": "C1",
             "events": [
               {
                 "event_id": "G1",
@@ -68,7 +67,6 @@
         "field_id": "guarantee_status",
         "cycles": [
           {
-            "cycle_id": "prediction_cycle",
             "events": [
               {
                 "event_id": "P1",
@@ -102,7 +100,6 @@
         "field_id": "received_amount",
         "cycles": [
           {
-            "cycle_id": "C1",
             "events": [
               {
                 "event_id": "P3",

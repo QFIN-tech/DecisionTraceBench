@@ -5,7 +5,6 @@
       "field_id": "guarantee_status",
       "cycles": [
         {
-          "cycle_id": "C1",
           "events": [
             {
               "event_id": "G1",
