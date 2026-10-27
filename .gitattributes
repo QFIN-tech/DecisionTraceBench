@@ -1,2 +1,5 @@
 # Keep evaluator snapshots and prompts consistent across platforms.
 * text=auto eol=lf
+
+# Keep the historical paper query byte-identical, including its original CRLF.
+assets/prompts/paper_audio_direct_20261021.txt -text whitespace=cr-at-eol

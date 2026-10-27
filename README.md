@@ -15,7 +15,7 @@ Both dataset subsets are available on [Hugging Face](https://huggingface.co/data
 | Human-performed | 26 | 8.61 | 308 | 562 |
 | Synthetic | 2,246 | 100.39 | 5,319 | 18,227 |
 
-Both are fixed research evaluation cohorts without training/development splits. Transcripts and construction scripts are not distributed. The paper's main human-audio comparison uses a common cohort of 25 recordings, distinct from the complete 26-recording human release.
+Both are fixed research evaluation cohorts without training/development splits. Synthetic construction references and historical sample/cohort indexes are described in the [reproduction guide](docs/REPRODUCTION.md). Human reading scripts and verbatim transcripts are not included. The paper's main human-audio comparison uses a common cohort of 25 recordings, distinct from the complete 26-recording human release.
 
 For paper-comparable prediction, both subsets use the same global vocabulary: **193 entity–field pairs and 64 scopes**. Use the complete task templates below or the [shared vocabulary](https://huggingface.co/datasets/QFIN/DecisionTraceBench/blob/main/assets/label_vocabulary.json). Subset coverage counts are not alternative inference vocabularies.
 
