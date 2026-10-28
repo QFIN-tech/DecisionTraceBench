@@ -4,7 +4,7 @@
 
 DecisionTraceBench is a speech benchmark for tracking decision-critical information in multi-party conversations. Grounded in Chinese financial dialogues, it evaluates how information is introduced, revised, suspended and settled, together with speaker attribution, business scope and temporal evidence. It aims to support collaboration between academia and industry on traceable speech understanding through structured trajectory annotations, task prompts and evaluation scripts.
 
-🤗 [Hugging Face](https://huggingface.co/datasets/QFIN/DecisionTraceBench)   |   🌐 [简体中文](README.zh-CN.md)
+🤗 [Hugging Face](https://huggingface.co/datasets/QFIN/DecisionTraceBench)   |   📑 [Paper](https://arxiv.org/abs/2610.34746)   |   🌐 [简体中文](README.zh-CN.md)
 
 Decision-Critical Information State Tracking (DCIST) evaluates the recovery of complete decision-state trajectories from multi-party conversations. A trajectory match requires the correct event sequence, actions, speaker attribution, scope, values and temporal evidence.
 
@@ -189,7 +189,19 @@ Use `python -m decisiontracebench score` or `python -m decisiontracebench judge`
 
 ## Citation
 
-If you use this code, please cite **DecisionTraceBench: Tracking Decision-Critical Information in Multi-Party Spoken Conversations**.
+If you use this code, please cite the [paper](https://arxiv.org/abs/2610.34746):
+
+```bibtex
+@misc{du2026decisiontracebenchtrackingdecisioncriticalinformation,
+      title={DecisionTraceBench: Tracking Decision-Critical Information in Multi-Party Spoken Conversations},
+      author={Wenchao Du and Fangxin Shang and Long Wu and Runze Cui and Qing Yang and Yehui Yang},
+      year={2026},
+      eprint={2610.34746},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2610.34746},
+}
+```
 
 ## License
 

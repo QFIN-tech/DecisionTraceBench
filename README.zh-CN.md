@@ -4,7 +4,7 @@
 
 DecisionTraceBench 是面向多人对话中决策关键信息跟踪的语音评测基准。它以中文金融对话为场景，评估信息从提出、修订、暂停到定案的完整过程，以及对应的说话人归属、业务作用域和时间证据。基准通过结构化轨迹标注、任务提示词和评测脚本，为学术界与产业界开展可追溯语音理解研究提供共同的评测基础。
 
-🤗 [Hugging Face](https://huggingface.co/datasets/QFIN/DecisionTraceBench)   |   🌐 [English](README.md)
+🤗 [Hugging Face](https://huggingface.co/datasets/QFIN/DecisionTraceBench)   |   📑 [Paper](https://arxiv.org/abs/2610.34746)   |   🌐 [English](README.md)
 
 决策关键信息状态跟踪（Decision-Critical Information State Tracking，DCIST）评估模型从多人对话中恢复完整决策状态轨迹的能力。轨迹匹配要求事件序列、动作、说话人归属、作用域、值和时间证据均满足评测要求。
 
@@ -189,7 +189,19 @@ tests/              Offline regression tests
 
 ## 引用
 
-使用本代码时，请引用论文 **DecisionTraceBench: Tracking Decision-Critical Information in Multi-Party Spoken Conversations**。
+使用本代码时，请引用[论文](https://arxiv.org/abs/2610.34746)：
+
+```bibtex
+@misc{du2026decisiontracebenchtrackingdecisioncriticalinformation,
+      title={DecisionTraceBench: Tracking Decision-Critical Information in Multi-Party Spoken Conversations},
+      author={Wenchao Du and Fangxin Shang and Long Wu and Runze Cui and Qing Yang and Yehui Yang},
+      year={2026},
+      eprint={2610.34746},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2610.34746},
+}
+```
 
 ## 许可证
 
