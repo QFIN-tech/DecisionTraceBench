@@ -4,20 +4,20 @@
 
 DecisionTraceBench is a speech benchmark for tracking decision-critical information in multi-party conversations. Grounded in Chinese financial dialogues, it evaluates how information is introduced, revised, suspended and settled, together with speaker attribution, business scope and temporal evidence. It aims to support collaboration between academia and industry on traceable speech understanding through structured trajectory annotations, task prompts and evaluation scripts.
 
-🤗 [Hugging Face](https://huggingface.co/datasets/QFIN/DecisionTraceBench)   |   📑 [Paper](https://arxiv.org/abs/2610.34746)   |   🌐 [简体中文](README.zh-CN.md)
+🤗 [Hugging Face (coming soon)](https://huggingface.co/datasets/QFIN/DecisionTraceBench)   |   📑 [Paper](https://arxiv.org/abs/2610.34746)   |   🌐 [简体中文](README.zh-CN.md)
 
 Decision-Critical Information State Tracking (DCIST) evaluates the recovery of complete decision-state trajectories from multi-party conversations. A trajectory match requires the correct event sequence, actions, speaker attribution, scope, values and temporal evidence.
 
-Both dataset subsets are available on [Hugging Face](https://huggingface.co/datasets/QFIN/DecisionTraceBench):
+Both dataset subsets will be available on [Hugging Face (coming soon)](https://huggingface.co/datasets/QFIN/DecisionTraceBench):
 
 | Subset | Recordings | Hours | Trajectories | Events |
 |---|---:|---:|---:|---:|
 | Human-performed | 26 | 8.61 | 308 | 562 |
 | Synthetic | 2,246 | 100.39 | 5,319 | 18,227 |
 
-Both are fixed research evaluation cohorts without training/development splits. Synthetic construction references and historical sample/cohort indexes are described in the [reproduction guide](docs/REPRODUCTION.md). Human reading scripts and verbatim transcripts are not included. The paper's main human-audio comparison uses a common cohort of 25 recordings, distinct from the complete 26-recording human release.
+The dataset is not yet publicly accessible. Both subsets are fixed research evaluation cohorts without training/development splits. Synthetic construction references and historical sample/cohort indexes are described in the [reproduction guide](docs/REPRODUCTION.md). Human reading scripts and verbatim transcripts are not included. The paper's main human-audio comparison uses a common cohort of 25 recordings, distinct from the planned complete 26-recording human release.
 
-For paper-comparable prediction, both subsets use the same global vocabulary: **193 entity–field pairs and 64 scopes**. Use the complete task templates below or the [shared vocabulary](https://huggingface.co/datasets/QFIN/DecisionTraceBench/blob/main/assets/label_vocabulary.json). Subset coverage counts are not alternative inference vocabularies.
+For paper-comparable prediction, both subsets use the same global vocabulary: **193 entity–field pairs and 64 scopes**. Use the complete task templates below. The shared vocabulary file will also be available with the dataset release. Subset coverage counts are not alternative inference vocabularies.
 
 ## Features
 
@@ -207,4 +207,4 @@ If you use this code, please cite the [paper](https://arxiv.org/abs/2610.34746):
 
 The code, prompts and documentation in this repository are licensed under [Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)](LICENSE).
 
-The separately distributed human-recording and synthetic subsets also use CC BY-NC 4.0. Third-party voice resources remain subject to their source licenses.
+The planned human-recording and synthetic dataset release will also use CC BY-NC 4.0. Third-party voice resources remain subject to their source licenses.

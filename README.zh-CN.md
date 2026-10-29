@@ -4,20 +4,20 @@
 
 DecisionTraceBench 是面向多人对话中决策关键信息跟踪的语音评测基准。它以中文金融对话为场景，评估信息从提出、修订、暂停到定案的完整过程，以及对应的说话人归属、业务作用域和时间证据。基准通过结构化轨迹标注、任务提示词和评测脚本，为学术界与产业界开展可追溯语音理解研究提供共同的评测基础。
 
-🤗 [Hugging Face](https://huggingface.co/datasets/QFIN/DecisionTraceBench)   |   📑 [Paper](https://arxiv.org/abs/2610.34746)   |   🌐 [English](README.md)
+🤗 [Hugging Face（即将开放）](https://huggingface.co/datasets/QFIN/DecisionTraceBench)   |   📑 [Paper](https://arxiv.org/abs/2610.34746)   |   🌐 [English](README.md)
 
 决策关键信息状态跟踪（Decision-Critical Information State Tracking，DCIST）评估模型从多人对话中恢复完整决策状态轨迹的能力。轨迹匹配要求事件序列、动作、说话人归属、作用域、值和时间证据均满足评测要求。
 
-两套数据均已在 [Hugging Face](https://huggingface.co/datasets/QFIN/DecisionTraceBench) 发布：
+两套数据后续将在 [Hugging Face（即将开放）](https://huggingface.co/datasets/QFIN/DecisionTraceBench) 开放，目前尚未公开：
 
 | 子集 | 录音数 | 时长（小时） | 轨迹数 | 事件数 |
 |---|---:|---:|---:|---:|
 | 人工录音 | 26 | 8.61 | 308 | 562 |
 | 合成语音 | 2,246 | 100.39 | 5,319 | 18,227 |
 
-两者均为固定研究评测集，不提供训练集或开发集划分，合成构造参考剧本及历史样本/cohort 索引见[复现材料说明](docs/REPRODUCTION.md)；其中不包含真人朗读剧本或逐字转写。论文的人工语音主比较使用 25 份共同录音，与完整的 26 份人工录音发布集不同。
+两者均为固定研究评测集，不提供训练集或开发集划分，合成构造参考剧本及历史样本/cohort 索引见[复现材料说明](docs/REPRODUCTION.md)；其中不包含真人朗读剧本或逐字转写。论文的人工语音主比较使用 25 份共同录音，与计划发布的完整 26 份人工录音集不同。
 
-为保持与论文评测条件一致，两个子集的预测输入均使用同一套全局词表：**193 个实体—字段对和 64 个作用域**。请使用完整任务模板，或读取[统一词表](https://huggingface.co/datasets/QFIN/DecisionTraceBench/blob/main/assets/label_vocabulary.json)；不能按子集实际覆盖情况缩小输入词表。
+为保持与论文评测条件一致，两个子集的预测输入均使用同一套全局词表：**193 个实体—字段对和 64 个作用域**。请使用下方完整任务模板；统一词表文件将随数据集一同开放，不能按子集实际覆盖情况缩小输入词表。
 
 ## 功能
 
@@ -207,4 +207,4 @@ tests/              Offline regression tests
 
 本仓库的代码、提示词和说明文档采用 [知识共享署名—非商业性使用 4.0 国际许可协议（CC BY-NC 4.0）](LICENSE)。
 
-独立分发的人工录音和合成子集同样采用 CC BY-NC 4.0；第三方声音资源仍须遵循其来源许可。
+计划发布的人工录音和合成子集同样采用 CC BY-NC 4.0；第三方声音资源仍须遵循其来源许可。
